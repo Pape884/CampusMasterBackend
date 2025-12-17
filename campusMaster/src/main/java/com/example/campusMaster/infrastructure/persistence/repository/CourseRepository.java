@@ -1,4 +1,4 @@
-package com.example.campusMaster.infrastructure.persistence;
+package com.example.campusMaster.infrastructure.persistence.repository;
 
 import java.util.List;
 import java.util.Optional;

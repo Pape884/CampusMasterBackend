@@ -22,7 +22,8 @@ import lombok.*;
 @Table (name="Couses")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Builder
 public class Course {
 
@@ -64,5 +65,15 @@ public class Course {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id", nullable = false)
     private User teacher;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "module_id")
+    private CourseModule module;
+
+
+    public Integer getEnrolledStudentsCount() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getEnrolledStudentsCount'");
+    }
 
 }

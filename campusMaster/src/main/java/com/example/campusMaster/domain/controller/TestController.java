@@ -9,15 +9,22 @@ import com.example.campusMaster.infrastructure.persistence.repository.UserReposi
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/test-db")
+@RequestMapping("/api/v1/test")
 @RequiredArgsConstructor
 public class TestController {
 
-    private final UserRepository userRepository;
+    @GetMapping("/public")
+    public String publicEndpoint() {
+        return "Public endpoint - accessible à tous";
+    }
 
-    @GetMapping
-    public String test() {
-        long count = userRepository.count();
-        return "Connexion OK - Nombre d'utilisateurs : " + count;
+    @GetMapping("/protected")
+    public String protectedEndpoint() {
+        return "Protected endpoint - besoin d'authentification";
+    }
+
+    @GetMapping("/admin")
+    public String adminEndpoint() {
+        return "Admin endpoint - besoin du rôle ADMIN";
     }
 }

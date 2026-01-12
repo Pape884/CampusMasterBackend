@@ -1,10 +1,13 @@
 package com.example.campusMaster.domain.entity;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -69,6 +73,20 @@ public class Course {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id")
     private CourseModule module;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Assignment> assignments = new HashSet<>();
+
+     // Méthodes métier
+    public void addAssignment(Assignment assignment) {
+        assignments.add(assignment);
+        assignment.setCourse(this);
+    }
+
+    public void updateDetails(String titre, String description) {
+        this.titre = titre;
+        this.description = description;
+    }
 
 
     public Integer getEnrolledStudentsCount() {

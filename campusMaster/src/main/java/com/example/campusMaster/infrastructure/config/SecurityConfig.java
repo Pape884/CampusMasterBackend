@@ -1,10 +1,11 @@
 package com.example.campusMaster.infrastructure.config;
 
+import com.example.campusMaster.infrastructure.security.JwtAuthentificationFilter;
+import com.example.campusMaster.infrastructure.security.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -22,10 +23,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.example.campusMaster.infrastructure.security.JwtAuthenticationEntryPoint;
-import com.example.campusMaster.infrastructure.security.JwtAuthentificationFilter;
-
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -33,83 +30,131 @@ import java.util.List;
 @EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     @Lazy
     private final JwtAuthentificationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+    // 🔐 Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
+
+    // 🔐 Authentication Manager
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration authConfig
+            AuthenticationConfiguration configuration
     ) throws Exception {
-        return authConfig.getAuthenticationManager();
+        return configuration.getAuthenticationManager();
     }
-    
+
+    // 🔐 Authentication Provider
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
-    
+
+    // 🔐 Security Filter Chain
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
+            // ❌ CSRF inutile pour API REST
             .csrf(csrf -> csrf.disable())
+
+            // 🌍 CORS centralisé ICI (aucun autre endroit)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .exceptionHandling(exception -> 
+
+            // ⚠️ Gestion des erreurs JWT
+            .exceptionHandling(exception ->
                 exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)
             )
-            .sessionManagement(session -> 
+
+            // 🚫 Pas de session (JWT)
+            .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
+
+            // 🔓 Autorisations
             .authorizeHttpRequests(auth -> auth
-                // Endpoints publics
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
-                .requestMatchers("/actuator/**").permitAll()
-                
-                // Endpoints Admin
+
+                // Public
+                .requestMatchers(
+                    "/api/v1/auth/**",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/actuator/**"
+                ).permitAll()
+
+                // ADMIN
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/courses/**").hasAnyRole("ADMIN", "TEACHER")
-                
-                // Endpoints Teacher
-                .requestMatchers(HttpMethod.POST, "/api/v1/courses/**").hasAnyRole("ADMIN", "TEACHER")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/courses/**").hasAnyRole("ADMIN", "TEACHER")
-                .requestMatchers(HttpMethod.POST, "/api/v1/assignments/**").hasAnyRole("ADMIN", "TEACHER")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/assignments/**").hasAnyRole("ADMIN", "TEACHER")
-                .requestMatchers(HttpMethod.POST, "/api/v1/grades/**").hasAnyRole("ADMIN", "TEACHER")
-                
-                // Endpoints Student
-                .requestMatchers(HttpMethod.POST, "/api/submissions/**").hasAnyRole("ADMIN", "STUDENT")
-                .requestMatchers(HttpMethod.POST, "/api/enrollments/**").hasAnyRole("ADMIN", "STUDENT")
-                
-                // Tous les autres endpoints nécessitent une authentification
+
+                // COURSES
+                .requestMatchers(HttpMethod.POST, "/api/v1/courses/**")
+                    .hasAnyRole("ADMIN", "TEACHER")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/courses/**")
+                    .hasAnyRole("ADMIN", "TEACHER")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/courses/**")
+                    .hasAnyRole("ADMIN", "TEACHER")
+
+                // ASSIGNMENTS
+                .requestMatchers(HttpMethod.POST, "/api/v1/assignments/**")
+                    .hasAnyRole("ADMIN", "TEACHER")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/assignments/**")
+                    .hasAnyRole("ADMIN", "TEACHER")
+
+                // GRADES
+                .requestMatchers(HttpMethod.POST, "/api/v1/grades/**")
+                    .hasAnyRole("ADMIN", "TEACHER")
+
+                // STUDENT
+                .requestMatchers(HttpMethod.POST, "/api/v1/submissions/**")
+                    .hasAnyRole("ADMIN", "STUDENT")
+                .requestMatchers(HttpMethod.POST, "/api/v1/enrollments/**")
+                    .hasAnyRole("ADMIN", "STUDENT")
+
+                // Tout le reste
                 .anyRequest().authenticated()
             );
-        
+
+        // 🔗 Provider + JWT filter
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        
+
         return http.build();
     }
-    
+
+    // 🌍 CONFIG CORS (SANS "*")
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+
         configuration.setAllowCredentials(true);
+
+        configuration.setAllowedOriginPatterns(List.of(
+            "http://localhost:3000",
+            "http://localhost:3001"
+        ));
+
+        configuration.setAllowedMethods(List.of(
+            "GET", "POST", "PUT", "DELETE", "OPTIONS"
+        ));
+
+        configuration.setAllowedHeaders(List.of("*"));
+
+        configuration.setExposedHeaders(List.of("Authorization"));
+
         configuration.setMaxAge(3600L);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 }

@@ -1,6 +1,6 @@
 package com.example.campusMaster.domain.entity;
+
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,18 +15,16 @@ import java.util.Set;
     @Index(name = "idx_assignment_course", columnList = "course_id"),
     @Index(name = "idx_assignment_deadline", columnList = "deadline")
 })
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Assignment {
-     @Id
+    
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @NotBlank(message = "Course ID obligatoire")
-    @Column(nullable = false)
-    private Long courseId;
     
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -44,10 +42,11 @@ public class Assignment {
     
     // Relations
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_ids", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "course_id", nullable = false)
     private Course course;
     
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<Submission> submissions = new HashSet<>();
     
     // Méthodes métier
@@ -59,17 +58,11 @@ public class Assignment {
         this.deadline = newDeadline;
     }
     
-    public Set<Submission> getSubmissions() {
-        return submissions;
+    public boolean isDeadlinePassed() {
+        return LocalDateTime.now().isAfter(deadline);
     }
     
     public void calculateStatistics() {
         // Calcul des statistiques
     }
-    
-    // Méthodes utilitaires
-    public boolean isDeadlinePassed() {
-        return LocalDateTime.now().isAfter(deadline);
-    }
-
 }

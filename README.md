@@ -5,63 +5,48 @@
 
 
 
-#spring.application.name=campusMaster
+Ton API Spring Boot doit exposer ces endpoints :
 
-# PostgreSQL Configuration
-#spring.datasource.url=jdbc:postgresql://localhost:5432/campusmaster
-#spring.datasource.username=admin
-#spring.datasource.password=
-#spring.datasource.driver-class-name=org.postgresql.Driver
+  -------------- Users ---------------------
 
-# JPA/Hibernate
-#spring.jpa.hibernate.ddl-auto=update
-#spring.jpa.show-sql=true
-#spring.jpa.properties.hibernate.format_sql=true
-#spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+    GET /api/users - Liste des utilisateurs avec filtres
 
-# Désactiver Spring Security temporairement pour les tests
-#spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-#spring.security.user.name=admin
-#spring.security.user.password=admin
+    GET /api/users/{id} - Détails d'un utilisateur
 
-# JWT Configuration
-#jwt.secret=your-super-secret-key-min-256-bits-campusmaster-2025
-#jwt.expiration=3600000
-#jwt.refresh-expiration=86400000
+    POST /api/users - Création d'un utilisateur
 
-# ===============================
-# Application
-# ===============================
-spring.application.name=campusMaster
+    PUT /api/users/{id} - Mise à jour d'un utilisateur
+
+    PATCH /api/users/{id}/status - Changement de statut
+
+    DELETE /api/users/{id} - Suppression d'un utilisateur
+
+    GET /api/users/stats - Statistiques
+
+    GET /api/users/search - Recherche rapide
 
 
-# ===============================
-# PostgreSQL (Docker)
-# ===============================
-spring.datasource.url=jdbc:postgresql://postgres:5432/campusmaster
-spring.datasource.username=${DB_USER}
-spring.datasource.password=${DB_PASSWORD}
-spring.datasource.driver-class-name=org.postgresql.Driver
+ -------------- Departements ----------------
 
 
-# ===============================
-# JPA / Hibernate
-# ===============================
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+    GET /api/departments - Liste des départements avec filtres
+
+    GET /api/departments/{id} - Détails d'un département
+
+    POST /api/departments - Création d'un département
+
+    PUT /api/departments/{id} - Mise à jour d'un département
+
+    PATCH /api/departments/{id}/status - Changement de statut
+
+    DELETE /api/departments/{id} - Suppression d'un département
+
+    GET /api/departments/stats - Statistiques
+
+    GET /api/departments/search - Recherche rapide
+
+    GET /api/departments/{id}/teachers - Enseignants du département
+
+    GET /api/departments/{id}/students - Étudiants du département
 
 
-# ===============================
-# Security
-# ===============================
-spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-
-
-# ===============================
-# JWT
-# ===============================
-jwt.secret=${JWT_SECRET}
-jwt.expiration=3600000
-jwt.refresh-expiration=86400000

@@ -1,6 +1,5 @@
 package com.example.campusMaster.domain.controller;
 
-import com.example.campusMaster.application.dto.request.CreateSubmissionRequest;
 import com.example.campusMaster.application.dto.response.ApiResponse;
 import com.example.campusMaster.application.dto.response.SubmissionResponse;
 import com.example.campusMaster.application.dto.response.UserResponse;
@@ -10,7 +9,6 @@ import com.example.campusMaster.infrastructure.security.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

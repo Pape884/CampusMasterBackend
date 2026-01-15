@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 public record CreateAssignmentRequest(
     @NotBlank(message = "Course ID obligatoire")
-    String courseId,
+    Long courseId,
     
     String description,
     

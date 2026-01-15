@@ -5,9 +5,7 @@ import com.example.campusMaster.application.dto.request.CreateAssignmentRequest;
 import com.example.campusMaster.application.dto.request.UpdateAssignmentRequest;
 import com.example.campusMaster.application.dto.response.AssignmentResponse;
 import com.example.campusMaster.domain.entity.Assignment;
-import com.example.campusMaster.domain.entity.Course;
 import com.example.campusMaster.infrastructure.persistence.repository.AssignmentRepository;
-import com.example.campusMaster.infrastructure.persistence.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +19,6 @@ import java.util.stream.Collectors;
 @Transactional
 public class AssignmentService {
     private final AssignmentRepository assignmentRepository;
-    private final CourseRepository courseRepository;
     
     public AssignmentResponse createAssignment(CreateAssignmentRequest request) {
         Assignment assignment = Assignment.builder()

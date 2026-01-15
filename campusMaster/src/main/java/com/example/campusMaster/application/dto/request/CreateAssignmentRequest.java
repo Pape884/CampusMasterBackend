@@ -1,10 +1,11 @@
 package com.example.campusMaster.application.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public record CreateAssignmentRequest(
-    @NotNull(message = "Course ID obligatoire")
+    @NotBlank(message = "Course ID obligatoire")
     Long courseId,
     
     String description,

@@ -4,15 +4,17 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.example.campusMaster.domain.entity.User;
 import com.example.campusMaster.domain.enums.Role;
-@Repository
-public interface UserRepository extends JpaRepository <User, Long> {
 
-     Optional<User> findByEmail(String email);
+@Repository
+public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
+    
+    Optional<User> findByEmail(String email);
     
     boolean existsByEmail(String email);
     
@@ -25,4 +27,7 @@ public interface UserRepository extends JpaRepository <User, Long> {
     
     @Query("SELECT COUNT(u) FROM User u WHERE u.role = :role")
     Long countByRole(Role role);
+    
+    // Nouvelles méthodes pour les statistiques
+    Long countByIsActive(Boolean isActive);
 }

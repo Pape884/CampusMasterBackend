@@ -2,7 +2,7 @@ package com.example.campusMaster.infrastructure.config;
 
 import lombok.RequiredArgsConstructor;
 
-import org.hibernate.validator.internal.util.stereotypes.Lazy;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

@@ -17,7 +17,6 @@ public interface ModuleRepository extends JpaRepository <CourseModule, Long>{
     
     List<Module> findBySemestre(Integer semestre);
     
-    
     boolean existsByCode(String code);
 
 }

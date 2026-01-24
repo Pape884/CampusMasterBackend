@@ -12,12 +12,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.campusMaster.application.dto.request.CreateUserRequest;
-import com.example.campusMaster.application.dto.request.UpdateUserRequest;
-import com.example.campusMaster.application.dto.response.UserResponse;
-import com.example.campusMaster.application.dto.response.UserStats;
+import com.example.campusMaster.application.dto.request.users.CreateUserRequest;
+import com.example.campusMaster.application.dto.request.users.UpdateUserRequest;
+import com.example.campusMaster.application.dto.response.users.UserResponse;
+import com.example.campusMaster.application.dto.response.users.UserStats;
 import com.example.campusMaster.domain.entity.User;
 import com.example.campusMaster.domain.enums.Role;
+import com.example.campusMaster.infrastructure.exception.ResourceAlreadyExistsException;
+import com.example.campusMaster.infrastructure.exception.ResourceNotFoundException;
 import com.example.campusMaster.infrastructure.persistence.repository.UserRepository;
 
 import jakarta.persistence.criteria.Predicate;
@@ -39,7 +41,8 @@ public class UserService {
             ? Sort.by(sortBy).ascending() 
             : Sort.by(sortBy).descending();
         
-        Pageable pageable = PageRequest.of(page, limit, sort);
+        int pageIndex = Math.max(page - 1, 0);
+        Pageable pageable = PageRequest.of(pageIndex, limit, sort);
         
         Specification<User> spec = (root, query, criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.conjunction();
@@ -48,6 +51,7 @@ public class UserService {
             if (search != null && !search.isEmpty()) {
                 String searchPattern = "%" + search.toLowerCase() + "%";
                 Predicate searchPredicate = criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("matricule")), searchPattern),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("nom")), searchPattern),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("prenom")), searchPattern),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), searchPattern)
@@ -117,7 +121,7 @@ public class UserService {
     // Créer un utilisateur
     public UserResponse createUser(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Un utilisateur avec cet email existe déjà");
+            throw new ResourceAlreadyExistsException("Un utilisateur avec cet email existe déjà");
         }
         
         User user = User.builder()
@@ -136,12 +140,12 @@ public class UserService {
     // Mettre à jour un utilisateur
     public UserResponse updateUser(Long id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         
         // Vérifier si l'email est déjà utilisé par un autre utilisateur
         if (!user.getEmail().equals(request.getEmail()) && 
             userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Cet email est déjà utilisé");
+            throw new ResourceAlreadyExistsException("Cet email est déjà utilisé");
         }
         
         user.setPrenom(request.getPrenom());
@@ -159,7 +163,7 @@ public class UserService {
     // Mettre à jour le statut
     public UserResponse updateStatus(Long id, Boolean isActive) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         
         user.setIsActive(isActive);
         User updated = userRepository.save(user);
@@ -169,7 +173,7 @@ public class UserService {
     // Supprimer un utilisateur
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("Utilisateur introuvable");
+            throw new ResourceNotFoundException("Utilisateur introuvable");
         }
         userRepository.deleteById(id);
     }
@@ -177,13 +181,13 @@ public class UserService {
     // Méthodes existantes
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         return mapToResponse(user);
     }
     
     public UserResponse getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         return mapToResponse(user);
     }
     
@@ -201,7 +205,7 @@ public class UserService {
     
     public UserResponse updateProfile(Long userId, String prenom, String nom) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         user.setPrenom(prenom);
         user.setNom(nom);
         User updated = userRepository.save(user);
@@ -210,7 +214,7 @@ public class UserService {
     
     public void changePassword(Long userId, String oldPassword, String newPassword) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new RuntimeException("Ancien mot de passe incorrect");
@@ -222,14 +226,14 @@ public class UserService {
     
     public void deactivateUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         user.setIsActive(false);
         userRepository.save(user);
     }
     
     public void activateUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         user.setIsActive(true);
         userRepository.save(user);
     }
@@ -242,9 +246,11 @@ public class UserService {
     private UserResponse mapToResponse(User user) {
         return new UserResponse(
                 user.getId(),
+                user.getMatricule(),
                 user.getPrenom(),
                 user.getNom(),
                 user.getEmail(),
+                user.getTelephone(),
                 user.getRole(),
                 user.getIsActive()
         );

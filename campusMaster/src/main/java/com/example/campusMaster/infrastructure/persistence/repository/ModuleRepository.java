@@ -14,10 +14,10 @@ public interface ModuleRepository extends JpaRepository <CourseModule, Long>{
     Optional<Module> findByCode(String code);
     List<CourseModule> findByDepartmentId(Long departmentId);
     List<Module> findByDepartment(Department department);
-    
-    List<Module> findBySemestre(Integer semestre);
-    
-    
+    long countByDepartmentId(Long departmentId);
+
+    List<Module> findBySemestre(String semestre);
+
     boolean existsByCode(String code);
 
 }

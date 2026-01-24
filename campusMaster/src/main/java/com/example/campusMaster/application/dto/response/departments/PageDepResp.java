@@ -1,8 +1,8 @@
-package com.example.campusMaster.application.dto.response;
+package com.example.campusMaster.application.dto.response.departments;
 
 import java.util.List;
 
-import com.example.campusMaster.application.dto.response.users.UserStats;
+import com.example.campusMaster.application.dto.response.Pagination;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,8 +13,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PageResponse<T> {
+public class PageDepResp<T> {
+
     private List<T> data;
     private Pagination pagination;
-    private UserStats stats;
+    private DepartmentStats stats;
 }
+

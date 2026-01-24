@@ -1,10 +1,10 @@
-package com.example.campusMaster.application.dto.request;
+package com.example.campusMaster.application.dto.request.users;
 import com.example.campusMaster.domain.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record RegisterRequest( @NotBlank(message = "Prénom obligatoire")
+public record ResisterRequest( @NotBlank(message = "Prénom obligatoire")
     String prenom,
     
     @NotBlank(message = "Nom obligatoire")

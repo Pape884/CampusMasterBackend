@@ -1,4 +1,4 @@
-package com.example.campusMaster.application.dto.response;
+package com.example.campusMaster.application.dto.response.users;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

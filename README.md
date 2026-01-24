@@ -3,6 +3,9 @@
 # Demarrer serveur spring boot
 ./mvnw spring-boot:run
 
+# Supprimer le cache
+rm -rf target
+
 
 
 Ton API Spring Boot doit exposer ces endpoints :

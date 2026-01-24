@@ -1,7 +1,8 @@
-package com.example.campusMaster.application.dto.response;
+package com.example.campusMaster.application.dto.response.submissions;
 
 import java.time.LocalDateTime;
 
+import com.example.campusMaster.application.dto.response.users.UserResponse;
 import com.example.campusMaster.domain.enums.SubmissionStatus;
 
 public record SubmissionResponse(

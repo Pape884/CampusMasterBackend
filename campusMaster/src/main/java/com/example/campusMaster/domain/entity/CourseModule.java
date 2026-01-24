@@ -3,6 +3,7 @@ package com.example.campusMaster.domain.entity;
 import java.util.HashSet;
 import java.util.Set;
 
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,17 +40,17 @@ public class CourseModule {
     private String code;
     
     @NotBlank(message = "Nom obligatoire")
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false, length = 20)
     private String name;
     
     @Column(columnDefinition = "TEXT")
     private String description;
     
-    @Column(nullable = false)
-    private Integer semestre;
+    @Column(nullable = false, length = 20)
+    private String semestre;
     
     // Relations
-    
+
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL)
     private Set<Course> courses = new HashSet<>();
 
@@ -64,8 +65,9 @@ public class CourseModule {
         // Logique de création
     }
     
-    public void update(String name, String description) {
+    public void update(String name,String code, String description) {
         this.name = name;
+        this.code = code;
         this.description = description;
     }
     

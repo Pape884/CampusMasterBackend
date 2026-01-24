@@ -18,12 +18,15 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "users") 
+@Table(name = "users")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true, nullable = true, length = 10)
+    private String matricule;
 
     @NotBlank(message = "Prénom obligatoire")
     @Column(nullable = false, length = 50)
@@ -37,6 +40,9 @@ public class User {
     @NotBlank(message = "Email obligatoire")
     @Column(unique = true, nullable = false, length = 100)
     private String email;
+
+    @Column(unique = true, nullable = true)
+    private Long telephone;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -58,7 +64,11 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL)
     private Set<Course> taughtCourses = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
+
 }

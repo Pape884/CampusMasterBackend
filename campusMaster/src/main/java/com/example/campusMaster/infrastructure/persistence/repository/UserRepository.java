@@ -15,6 +15,8 @@ import com.example.campusMaster.domain.enums.Role;
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
     
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByMatricule(String matricule);
     
     boolean existsByEmail(String email);
     

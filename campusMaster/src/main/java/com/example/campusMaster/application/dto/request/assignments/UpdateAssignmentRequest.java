@@ -1,4 +1,4 @@
-package com.example.campusMaster.application.dto.request;
+package com.example.campusMaster.application.dto.request.assignments;
 
 import java.time.LocalDateTime;
 

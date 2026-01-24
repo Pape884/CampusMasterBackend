@@ -1,10 +1,11 @@
 package com.example.campusMaster.application.Services;
 
-import com.example.campusMaster.application.dto.request.CreateAssignmentRequest;
-import com.example.campusMaster.application.dto.request.UpdateAssignmentRequest;
-import com.example.campusMaster.application.dto.response.AssignmentResponse;
+import com.example.campusMaster.application.dto.request.assignments.CreateAssignmentRequest;
+import com.example.campusMaster.application.dto.request.assignments.UpdateAssignmentRequest;
+import com.example.campusMaster.application.dto.response.assignments.AssignmentResponse;
 import com.example.campusMaster.domain.entity.Assignment;
 import com.example.campusMaster.domain.entity.Course;
+import com.example.campusMaster.infrastructure.exception.ResourceNotFoundException;
 import com.example.campusMaster.infrastructure.persistence.repository.AssignmentRepository;
 import com.example.campusMaster.infrastructure.persistence.repository.CourseRepository;
 
@@ -27,8 +28,8 @@ public class AssignmentService {
     public AssignmentResponse createAssignment(CreateAssignmentRequest request) {
         // Charger le cours
         Course course = courseRepository.findById(request.courseId())
-                .orElseThrow(() -> new RuntimeException("Cours introuvable"));
-        
+                        .orElseThrow(() -> new ResourceNotFoundException("Cours introuvable"));
+
         Assignment assignment = Assignment.builder()
                 .course(course)
                 .description(request.description())
@@ -41,7 +42,7 @@ public class AssignmentService {
     
     public AssignmentResponse updateAssignment(Long id, UpdateAssignmentRequest request) {
         Assignment assignment = assignmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Devoir introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Devoir introuvable"));
         
         if (request.description() != null) {
             assignment.setDescription(request.description());
@@ -57,7 +58,7 @@ public class AssignmentService {
     
     public AssignmentResponse getAssignmentById(Long id) {
         Assignment assignment = assignmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Devoir introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Devoir introuvable"));
         return mapToResponse(assignment);
     }
     

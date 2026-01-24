@@ -12,13 +12,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.campusMaster.application.Services.UserService;
-import com.example.campusMaster.application.dto.request.CreateUserRequest;
-import com.example.campusMaster.application.dto.request.UpdateUserRequest;
-import com.example.campusMaster.application.dto.request.UpdateStatusRequest;
+import com.example.campusMaster.application.dto.request.users.CreateUserRequest;
+import com.example.campusMaster.application.dto.request.users.UpdateStatusRequest;
+import com.example.campusMaster.application.dto.request.users.UpdateUserRequest;
 import com.example.campusMaster.application.dto.response.PageResponse;
 import com.example.campusMaster.application.dto.response.Pagination;
-import com.example.campusMaster.application.dto.response.UserResponse;
-import com.example.campusMaster.application.dto.response.UserStats;
+import com.example.campusMaster.application.dto.response.users.UserResponse;
+import com.example.campusMaster.application.dto.response.users.UserStats;
 import com.example.campusMaster.domain.entity.User;
 import com.example.campusMaster.infrastructure.security.SecurityUtils;
 
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Users", description = "Gestion des utilisateurs")
@@ -176,9 +176,11 @@ public class UserController {
     private UserResponse convertToResponse(User user) {
         return new UserResponse(
                 user.getId(),
+                user.getMatricule(),
                 user.getPrenom(),
                 user.getNom(),
                 user.getEmail(),
+                user.getTelephone(),
                 user.getRole(),
                 user.getIsActive()
         );

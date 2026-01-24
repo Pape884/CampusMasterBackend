@@ -1,11 +1,13 @@
 package com.example.campusMaster.application.Services;
 
-import com.example.campusMaster.application.dto.response.SubmissionResponse;
-import com.example.campusMaster.application.dto.response.UserResponse;
+import com.example.campusMaster.application.dto.response.submissions.SubmissionResponse;
+import com.example.campusMaster.application.dto.response.users.UserResponse;
 import com.example.campusMaster.domain.entity.Assignment;
 import com.example.campusMaster.domain.entity.Submission;
 import com.example.campusMaster.domain.entity.User;
 import com.example.campusMaster.domain.enums.SubmissionStatus;
+import com.example.campusMaster.infrastructure.exception.ResourceAlreadyExistsException;
+import com.example.campusMaster.infrastructure.exception.ResourceNotFoundException;
 import com.example.campusMaster.infrastructure.persistence.repository.AssignmentRepository;
 import com.example.campusMaster.infrastructure.persistence.repository.SubmissionRepository;
 import com.example.campusMaster.infrastructure.persistence.repository.UserRepository;
@@ -39,16 +41,16 @@ public class SubmissionService {
         
         // Récupérer le devoir
         Assignment assignment = assignmentRepository.findById(assignmentId)
-            .orElseThrow(() -> new RuntimeException("Devoir introuvable"));
+            .orElseThrow(() -> new ResourceNotFoundException("Devoir introuvable"));
         
         // Récupérer l'étudiant
         User student = userRepository.findById(studentId)
-            .orElseThrow(() -> new RuntimeException("Étudiant introuvable"));
+            .orElseThrow(() -> new ResourceNotFoundException("Étudiant introuvable"));
         
         // Vérifier si l'étudiant a déjà soumis ce devoir
         submissionRepository.findByAssignmentAndStudent(assignment, student)
             .ifPresent(existing -> {
-                throw new RuntimeException("Vous avez déjà soumis ce devoir. Utilisez la mise à jour pour modifier votre soumission.");
+                throw new ResourceAlreadyExistsException("Vous avez déjà soumis ce devoir. Utilisez la mise à jour pour modifier votre soumission.");
             });
         
         // Vérifier la deadline
@@ -87,11 +89,11 @@ public class SubmissionService {
         log.info("Mise à jour de la soumission {}", submissionId);
         
         Submission submission = submissionRepository.findById(submissionId)
-            .orElseThrow(() -> new RuntimeException("Soumission introuvable"));
+            .orElseThrow(() -> new ResourceNotFoundException("Soumission introuvable"));
         
         // Vérifier que la deadline n'est pas dépassée
         if (LocalDateTime.now().isAfter(submission.getAssignment().getDeadline())) {
-            throw new RuntimeException("Impossible de mettre à jour : la deadline est dépassée");
+            throw new ResourceNotFoundException("Impossible de mettre à jour : la deadline est dépassée");
         }
         
         // Supprimer l'ancien fichier
@@ -125,7 +127,7 @@ public class SubmissionService {
         log.debug("Récupération de la soumission {}", id);
         
         Submission submission = submissionRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Soumission introuvable"));
+            .orElseThrow(() -> new ResourceNotFoundException("Soumission introuvable"));
         
         return mapToResponse(submission);
     }
@@ -138,7 +140,7 @@ public class SubmissionService {
         log.debug("Récupération des soumissions pour le devoir {}", assignmentId);
         
         if (!assignmentRepository.existsById(assignmentId)) {
-            throw new RuntimeException("Devoir introuvable");
+            throw new ResourceNotFoundException("Devoir introuvable");
         }
         
         List<Submission> submissions = submissionRepository.findByAssignmentId(assignmentId);
@@ -156,7 +158,7 @@ public class SubmissionService {
         log.debug("Récupération des soumissions de l'étudiant {}", studentId);
         
         if (!userRepository.existsById(studentId)) {
-            throw new RuntimeException("Étudiant introuvable");
+            throw new ResourceNotFoundException("Étudiant introuvable");
         }
         
         List<Submission> submissions = submissionRepository.findByStudentId(studentId);
@@ -173,11 +175,11 @@ public class SubmissionService {
         log.info("Retrait de la soumission {}", id);
         
         Submission submission = submissionRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Soumission introuvable"));
+            .orElseThrow(() -> new ResourceNotFoundException("Soumission introuvable"));
         
         // Vérifier que la deadline n'est pas dépassée
         if (LocalDateTime.now().isAfter(submission.getAssignment().getDeadline())) {
-            throw new RuntimeException("Impossible de retirer : la deadline est dépassée");
+            throw new ResourceNotFoundException("Impossible de retirer : la deadline est dépassée");
         }
         
         submission.withdraw();
@@ -227,9 +229,11 @@ public class SubmissionService {
         
         UserResponse studentResponse = new UserResponse(
             student.getId(),
+            student.getMatricule(),
             student.getPrenom(),
             student.getNom(),
             student.getEmail(),
+            student.getTelephone(),
             student.getRole(),
             student.getIsActive()
         );

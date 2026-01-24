@@ -23,7 +23,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
-@Table (name="Couses")
+@Table (name="Courses")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -74,7 +74,7 @@ public class Course {
     @JoinColumn(name = "module_id")
     private CourseModule module;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private Set<Assignment> assignments = new HashSet<>();
 
      // Méthodes métier
@@ -90,7 +90,6 @@ public class Course {
 
 
     public Integer getEnrolledStudentsCount() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getEnrolledStudentsCount'");
     }
 

@@ -1,10 +1,12 @@
 package com.example.campusMaster.application.Services;
 
 import com.example.campusMaster.application.dto.request.LoginRequest;
-import com.example.campusMaster.application.dto.request.ResisterRequest;
+import com.example.campusMaster.application.dto.request.users.ResisterRequest;
 import com.example.campusMaster.application.dto.response.AuthResponse;
-import com.example.campusMaster.application.dto.response.UserResponse;
+import com.example.campusMaster.application.dto.response.users.UserResponse;
 import com.example.campusMaster.domain.entity.User;
+import com.example.campusMaster.infrastructure.exception.ResourceAlreadyExistsException;
+import com.example.campusMaster.infrastructure.exception.ResourceNotFoundException;
 import com.example.campusMaster.infrastructure.persistence.repository.UserRepository;
 import com.example.campusMaster.infrastructure.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +33,7 @@ public class AuthService {
     public AuthResponse register(ResisterRequest request) {
         // Vérifier si l'email existe déjà
         if (userRepository.existsByEmail(request.email())) {
-            throw new RuntimeException("Email déjà utilisé");
+            throw new ResourceAlreadyExistsException("Email déjà utilisé");
         }
         
         // Créer l'utilisateur
@@ -69,10 +71,10 @@ public class AuthService {
         
         // Récupérer l'utilisateur
         User user = userRepository.findByEmail(request.email())
-            .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+            .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         
         if (!user.getIsActive()) {
-            throw new RuntimeException("Compte désactivé");
+            throw new ResourceNotFoundException("Compte désactivé");
         }
         
         // Générer les tokens
@@ -94,7 +96,7 @@ public class AuthService {
         
         String email = jwtTokenProvider.getEmailFromToken(refreshToken);
         User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+            .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         
         String newToken = jwtTokenProvider.generateToken(email);
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(email);
@@ -109,9 +111,9 @@ public class AuthService {
      */
     public void resetPassword(String email) {
         User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+            .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         
-        // TODO: Générer un token de réinitialisation et envoyer par email
+        
         // Cette logique sera implémentée avec le EmailService
     }
     
@@ -121,9 +123,11 @@ public class AuthService {
     private UserResponse mapToUserResponse(User user) {
         return new UserResponse(
             user.getId(),
+            user.getMatricule(),
             user.getPrenom(),
             user.getNom(),
             user.getEmail(),
+            user.getTelephone(),
             user.getRole(),
             user.getIsActive()
         );

@@ -1,4 +1,4 @@
-package com.example.campusMaster.application.dto.request;
+package com.example.campusMaster.application.dto.request.soumissions;
 
 import jakarta.validation.constraints.NotBlank;
 

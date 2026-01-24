@@ -47,8 +47,7 @@ public class Submission {
     @Column(nullable = false)
     private LocalDateTime submittedAt;
 
-    @Column
-    private Double grade;
+
 
     
     @UpdateTimestamp
@@ -63,8 +62,8 @@ public class Submission {
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
     
-    //@OneToOne(mappedBy = "submission", cascade = CascadeType.ALL)
-    //private Grade grade;
+    @OneToOne(mappedBy = "submission", cascade = CascadeType.ALL)
+    private Grade grade;
     
     // Méthodes métier
     public void submit() {

@@ -53,7 +53,6 @@ public class CourseModule {
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL)
     private Set<Course> courses = new HashSet<>();
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id") 
     private Department department;

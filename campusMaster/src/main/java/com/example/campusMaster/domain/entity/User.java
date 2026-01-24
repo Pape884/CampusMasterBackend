@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+
 @Entity
 @Getter
 @Setter
@@ -61,4 +62,25 @@ public class User {
     
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL)
     private Set<Course> taughtCourses = new HashSet<>();
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    private Set<Enrollment> enrollments = new HashSet<>();
+    
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    private Set<Submission> submissions = new HashSet<>();
+    
+    @OneToMany(mappedBy = "gradedBy", cascade = CascadeType.ALL)
+    private Set<Grade> grades = new HashSet<>();
+    
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
+    private Set<Message> sentMessages = new HashSet<>();
+    
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
+    private Set<Message> receivedMessages = new HashSet<>();
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<Notification> notifications = new HashSet<>();
+    
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    private Set<Announcement> announcements = new HashSet<>();
 }

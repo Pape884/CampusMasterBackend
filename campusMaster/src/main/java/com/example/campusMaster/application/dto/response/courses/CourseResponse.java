@@ -19,6 +19,7 @@ public class CourseResponse {
     String semestre;
     Integer annee;
     Boolean isActive;
+    Long moduleId;
     UserResponse teacher;
     Integer studentsCount;
     LocalDateTime createdAt;

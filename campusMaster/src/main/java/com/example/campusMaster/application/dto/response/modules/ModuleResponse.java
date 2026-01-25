@@ -14,5 +14,6 @@ public class ModuleResponse {
     private String code;
     private String name;
     private String semestre;
+    private Long departmentId;
     private List<CourseResponse> courses;
 }

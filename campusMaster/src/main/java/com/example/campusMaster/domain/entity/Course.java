@@ -26,8 +26,8 @@ import lombok.*;
 @Table (name="Courses")
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
 @Setter
+@Getter
 @Builder
 public class Course {
 
@@ -53,7 +53,11 @@ public class Course {
     @NotNull(message = "Année obligatoire")
     @Column(nullable = false)
     private Integer annee;
-    
+
+    @NotNull(message = "Crédits obligatoire")
+    @Column(nullable = false)
+    private Integer credits;
+
     @Builder.Default
     @Column(nullable = false)
     private Boolean isActive = true;
@@ -75,6 +79,7 @@ public class Course {
     private CourseModule module;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<Assignment> assignments = new HashSet<>();
 
      // Méthodes métier

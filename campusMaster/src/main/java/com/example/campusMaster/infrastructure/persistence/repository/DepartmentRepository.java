@@ -1,20 +1,28 @@
 package com.example.campusMaster.infrastructure.persistence.repository;
 
-
 import java.util.Optional;
+
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.example.campusMaster.domain.entity.Department;
 
-public interface DepartmentRepository
-        extends JpaRepository<Department, Long>, JpaSpecificationExecutor<Department> {
-            boolean existsByCode(String code);
+@Repository
+public interface DepartmentRepository extends JpaRepository <Department, Long>,  
+                                                JpaSpecificationExecutor<Department> {
+    Optional<Department> findByCode(String code);
+    
+    Optional<Department> findByName(String name);
+    
+    boolean existsByCode(String code);
+    
+    boolean existsByName(String name);
 
-    Long countByIsActive(Boolean isActive);
+ Long countByIsActive(Boolean isActive);
 
     @Query("""
                 SELECT COUNT(u)

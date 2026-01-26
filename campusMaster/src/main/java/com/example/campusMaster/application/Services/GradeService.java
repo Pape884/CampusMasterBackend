@@ -1,7 +1,7 @@
 package com.example.campusMaster.application.Services;
-import com.example.campusMaster.application.dto.request.CreateGradeRequest;
-import com.example.campusMaster.application.dto.response.GradeResponse;
-import com.example.campusMaster.application.dto.response.UserResponse;
+import com.example.campusMaster.application.dto.request.grade.CreateGradeRequest;
+import com.example.campusMaster.application.dto.response.grade.GradeResponse;
+import com.example.campusMaster.application.dto.response.users.UserResponse;
 import com.example.campusMaster.domain.entity.Grade;
 import com.example.campusMaster.domain.entity.Submission;
 import com.example.campusMaster.domain.entity.User;
@@ -142,9 +142,11 @@ public class GradeService {
     private GradeResponse mapToResponse(Grade grade) {
         UserResponse gradedBy = new UserResponse(
                 grade.getGradedBy().getId(),
+                grade.getGradedBy().getMatricule(),
                 grade.getGradedBy().getPrenom(),
                 grade.getGradedBy().getNom(),
                 grade.getGradedBy().getEmail(),
+                grade.getGradedBy().getTelephone(),
                 grade.getGradedBy().getRole(),
                 grade.getGradedBy().getIsActive()
         );

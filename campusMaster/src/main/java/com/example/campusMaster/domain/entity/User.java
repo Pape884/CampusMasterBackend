@@ -66,6 +66,7 @@ public class User {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<Course> taughtCourses = new HashSet<>();
 
     @ManyToOne
@@ -74,23 +75,30 @@ public class User {
 
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<Enrollment> enrollments = new HashSet<>();
     
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    @Builder.Default    
     private Set<Submission> submissions = new HashSet<>();
     
     @OneToMany(mappedBy = "gradedBy", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<Grade> grades = new HashSet<>();
     
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<Message> sentMessages = new HashSet<>();
     
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<Message> receivedMessages = new HashSet<>();
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<Notification> notifications = new HashSet<>();
     
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<Announcement> announcements = new HashSet<>();
 }

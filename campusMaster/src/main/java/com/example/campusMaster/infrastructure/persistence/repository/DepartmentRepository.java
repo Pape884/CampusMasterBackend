@@ -2,7 +2,6 @@ package com.example.campusMaster.infrastructure.persistence.repository;
 
 import java.util.Optional;
 
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -12,17 +11,17 @@ import org.springframework.stereotype.Repository;
 import com.example.campusMaster.domain.entity.Department;
 
 @Repository
-public interface DepartmentRepository extends JpaRepository <Department, Long>,  
-                                                JpaSpecificationExecutor<Department> {
+public interface DepartmentRepository extends JpaRepository<Department, Long>,
+        JpaSpecificationExecutor<Department> {
     Optional<Department> findByCode(String code);
-    
+
     Optional<Department> findByName(String name);
-    
+
     boolean existsByCode(String code);
-    
+
     boolean existsByName(String name);
 
- Long countByIsActive(Boolean isActive);
+    Long countByIsActive(Boolean isActive);
 
     @Query("""
                 SELECT COUNT(u)
@@ -52,11 +51,11 @@ public interface DepartmentRepository extends JpaRepository <Department, Long>,
     long countAllModules();
 
     @Query("""
-        SELECT DISTINCT d
-        FROM Department d
-        LEFT JOIN FETCH d.modules m
-        LEFT JOIN FETCH m.courses
-        WHERE d.id = :id
-    """)
+                SELECT DISTINCT d
+                FROM Department d
+                LEFT JOIN FETCH d.modules m
+                LEFT JOIN FETCH m.courses
+                WHERE d.id = :id
+            """)
     Optional<Department> findByIdWithModulesAndCourses(@Param("id") Long id);
 }

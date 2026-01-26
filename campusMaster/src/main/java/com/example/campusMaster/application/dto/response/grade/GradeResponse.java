@@ -1,6 +1,8 @@
-package com.example.campusMaster.application.dto.response;
+package com.example.campusMaster.application.dto.response.grade;
 
 import java.time.LocalDateTime;
+
+import com.example.campusMaster.application.dto.response.users.UserResponse;
 
 public record GradeResponse(
     Long id,

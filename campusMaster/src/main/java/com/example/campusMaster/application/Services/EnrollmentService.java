@@ -1,8 +1,7 @@
 package com.example.campusMaster.application.Services;
 
-import com.example.campusMaster.application.dto.response.EnrollmentResponse;
-import com.example.campusMaster.application.dto.response.CourseResponse;
-import com.example.campusMaster.application.dto.response.UserResponse;
+import com.example.campusMaster.application.dto.response.courses.CourseResponse;
+import com.example.campusMaster.application.dto.response.enrollement.EnrollmentResponse;
 import com.example.campusMaster.domain.entity.Course;
 import com.example.campusMaster.domain.entity.Enrollment;
 import com.example.campusMaster.domain.entity.User;
@@ -47,11 +46,6 @@ public class EnrollmentService {
             throw new RuntimeException("Vous êtes déjà inscrit à ce cours");
         }
 
-        // Vérifier la capacité maximale du cours
-        Long currentEnrollments = enrollmentRepository.countActiveEnrollmentsByCourseId(courseId);
-        if (course.getMaxStudents() != null && currentEnrollments >= course.getMaxStudents()) {
-            throw new RuntimeException("Le cours a atteint sa capacité maximale");
-        }
 
         // Créer l'inscription
         Enrollment enrollment = Enrollment.builder()
@@ -167,25 +161,28 @@ public class EnrollmentService {
     // ==================== MAPPER ====================
 
     private EnrollmentResponse mapToResponse(Enrollment enrollment) {
-        CourseResponse courseResponse = new CourseResponse(
-                enrollment.getCourse().getId(),
-                enrollment.getCourse().getTitle(),
-                enrollment.getCourse().getDescription(),
-                enrollment.getCourse().getCode(),
-                enrollment.getCourse().getCredits(),
-                enrollment.getCourse().getMaxStudents(),
-                null, // teacher - peut être ajouté si nécessaire
-                null, // category - peut être ajouté si nécessaire
-                enrollment.getCourse().getCreatedAt(),
-                enrollment.getCourse().getUpdatedAt()
-        );
 
-        return new EnrollmentResponse(
-                enrollment.getId(),
-                courseResponse,
-                enrollment.getEnrolledAt(),
-                enrollment.getIsActive(),
-                enrollment.getFinalGrade()
-        );
+        CourseResponse courseResponse = CourseResponse.builder()
+            .id(enrollment.getCourse().getId())
+            .code(enrollment.getCourse().getCode())
+            .titre(enrollment.getCourse().getTitre())
+            .description(enrollment.getCourse().getDescription())
+            .semestre(enrollment.getCourse().getSemestre())
+            .annee(enrollment.getCourse().getAnnee())
+            .isActive(enrollment.getCourse().getIsActive())
+            .module(enrollment.getCourse().getModule())
+            .credits(enrollment.getCourse().getCredits())
+            .createdAt(enrollment.getCourse().getCreatedAt())
+        .build();
+
+        EnrollmentResponse enrollmentResponse = EnrollmentResponse.builder()
+                .id(enrollment.getId())
+                .course(courseResponse)
+                .enrolledAt(enrollment.getEnrolledAt())
+                .isActive(enrollment.getIsActive())
+                .finalGrade(enrollment.getFinalGrade())
+        .build();
+
+        return enrollmentResponse;
     }
 }

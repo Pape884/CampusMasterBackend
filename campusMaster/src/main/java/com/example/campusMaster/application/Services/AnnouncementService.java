@@ -1,8 +1,8 @@
 package com.example.campusMaster.application.Services;
 
-import com.example.campusMaster.application.dto.request.CreateAnnouncementRequest;
-import com.example.campusMaster.application.dto.response.AnnouncementResponse;
-import com.example.campusMaster.application.dto.response.UserResponse;
+import com.example.campusMaster.application.dto.request.announcement.CreateAnnouncementRequest;
+import com.example.campusMaster.application.dto.response.announcement.AnnouncementResponse;
+import com.example.campusMaster.application.dto.response.users.UserResponse;
 import com.example.campusMaster.domain.entity.Announcement;
 import com.example.campusMaster.domain.entity.Course;
 import com.example.campusMaster.domain.entity.User;
@@ -218,10 +218,11 @@ public class AnnouncementService {
     private AnnouncementResponse mapToResponse(Announcement announcement) {
         UserResponse author = new UserResponse(
                 announcement.getAuthor().getId(),
+                announcement.getAuthor().getMatricule(),
                 announcement.getAuthor().getPrenom(),
                 announcement.getAuthor().getNom(),
                 announcement.getAuthor().getEmail(),
-                announcement.getAuthor().getRole(),
+                announcement.getAuthor().getTelephone(), null, 
                 announcement.getAuthor().getIsActive()
         );
         

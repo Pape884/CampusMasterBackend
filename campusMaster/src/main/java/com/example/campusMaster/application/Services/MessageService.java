@@ -1,7 +1,7 @@
 package com.example.campusMaster.application.Services;
 
-import com.example.campusMaster.application.dto.response.MessageResponse;
-import com.example.campusMaster.application.dto.response.UserResponse;
+import com.example.campusMaster.application.dto.response.message.MessageResponse;
+import com.example.campusMaster.application.dto.response.users.UserResponse;
 import com.example.campusMaster.domain.entity.Message;
 import com.example.campusMaster.domain.entity.User;
 import com.example.campusMaster.infrastructure.persistence.repository.MessageRepository;
@@ -177,18 +177,22 @@ public class MessageService {
     private MessageResponse mapToResponse(Message message) {
         UserResponse sender = new UserResponse(
                 message.getSender().getId(),
+                message.getSender().getMatricule(),
                 message.getSender().getPrenom(),
                 message.getSender().getNom(),
                 message.getSender().getEmail(),
+                message.getSender().getTelephone(),
                 message.getSender().getRole(),
                 message.getSender().getIsActive()
         );
-        
+
         UserResponse receiver = new UserResponse(
                 message.getReceiver().getId(),
+                message.getReceiver().getMatricule(),
                 message.getReceiver().getPrenom(),
                 message.getReceiver().getNom(),
                 message.getReceiver().getEmail(),
+                message.getReceiver().getTelephone(),
                 message.getReceiver().getRole(),
                 message.getReceiver().getIsActive()
         );

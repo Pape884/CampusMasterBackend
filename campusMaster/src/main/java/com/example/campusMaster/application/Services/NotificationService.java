@@ -1,8 +1,8 @@
 package com.example.campusMaster.application.Services;
 
 
-import com.example.campusMaster.application.dto.request.CreateNotificationRequest;
-import com.example.campusMaster.application.dto.response.NotificationResponse;
+import com.example.campusMaster.application.dto.request.message.CreateNotificationRequest;
+import com.example.campusMaster.application.dto.response.notification.NotificationResponse;
 import com.example.campusMaster.domain.entity.Notification;
 import com.example.campusMaster.domain.entity.User;
 import com.example.campusMaster.domain.enums.NotificationType;
@@ -188,13 +188,14 @@ public class NotificationService {
     // ==================== MAPPER ====================
     
     private NotificationResponse mapToResponse(Notification notification) {
-        return new NotificationResponse(
-                notification.getId(),
-                notification.getNotificationType(),
-                notification.getTitle(),
-                notification.getContent(),
-                notification.getIsRead(),
-                notification.getCreatedAt()
-        );
+        NotificationResponse notificationResponse = NotificationResponse.builder()
+                .id(notification.getId())
+                .notificationType(notification.getNotificationType())
+                .title(notification.getTitle())
+                .content(notification.getContent())
+                .isRead(notification.getIsRead())
+                .createdAt(notification.getCreatedAt())
+                .build();
+        return notificationResponse;
     }
 }

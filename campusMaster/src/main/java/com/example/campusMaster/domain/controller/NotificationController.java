@@ -9,11 +9,12 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.campusMaster.application.Services.NotificationService;
 import com.example.campusMaster.application.Services.UserService;
-import com.example.campusMaster.application.dto.response.ApiResponse;
-import com.example.campusMaster.application.dto.response.NotificationResponse;
-import com.example.campusMaster.application.dto.response.UserResponse;
+import com.example.campusMaster.application.dto.response.notification.NotificationResponse;
+import com.example.campusMaster.application.dto.response.users.UserResponse;
+import com.example.campusMaster.infrastructure.exception.ApiSuccessResponse;
 import com.example.campusMaster.infrastructure.security.SecurityUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -28,62 +29,100 @@ public class NotificationController {
     
     @Operation(summary = "Lister mes notifications")
     @GetMapping
-    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getMyNotifications() {
+    public ResponseEntity<ApiSuccessResponse<List<NotificationResponse>>> getMyNotifications() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
         List<NotificationResponse> notifications = 
             notificationService.getNotificationsByUser(currentUser.id());
-        return ResponseEntity.ok(ApiResponse.success(notifications));
+        return ResponseEntity.ok(ApiSuccessResponse.<List<NotificationResponse>>builder()
+                .success(true)
+                .message("Liste des notifications")
+                .data(notifications)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
     
     @Operation(summary = "Lister mes notifications non lues")
     @GetMapping("/unread")
-    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getUnreadNotifications() {
+    public ResponseEntity<ApiSuccessResponse<List<NotificationResponse>>> getUnreadNotifications() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
         List<NotificationResponse> notifications = 
             notificationService.getUnreadNotifications(currentUser.id());
-        return ResponseEntity.ok(ApiResponse.success(notifications));
+
+        return ResponseEntity.ok(ApiSuccessResponse.<List<NotificationResponse>>builder()
+                .success(true)
+                .message("Liste des notifications non lues")
+                .data(notifications)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
     
     @Operation(summary = "Nombre de notifications non lues")
     @GetMapping("/unread/count")
-    public ResponseEntity<ApiResponse<Long>> countUnreadNotifications() {
+    public ResponseEntity<ApiSuccessResponse<Long>> countUnreadNotifications() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
         Long count = notificationService.countUnreadNotifications(currentUser.id());
-        return ResponseEntity.ok(ApiResponse.success(count));
+        return ResponseEntity.ok(ApiSuccessResponse.<Long>builder()
+                .success(true)
+                .message("Nombre de notifications non lues")
+                .data(count)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
     
     @Operation(summary = "Marquer une notification comme lue")
     @PutMapping("/{id}/read")
-    public ResponseEntity<ApiResponse<String>> markNotificationAsRead(@PathVariable Long id) {
+    public ResponseEntity<ApiSuccessResponse<String>> markNotificationAsRead(@PathVariable Long id) {
         notificationService.markAsRead(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "Notification marquée comme lue"));
+        return ResponseEntity.ok(ApiSuccessResponse.<String>builder()
+                .success(true)
+                .message("Notification marquée comme lue")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
     
     @Operation(summary = "Marquer toutes les notifications comme lues")
     @PutMapping("/read-all")
-    public ResponseEntity<ApiResponse<String>> markAllAsRead() {
+    public ResponseEntity<ApiSuccessResponse<String>> markAllAsRead() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
         notificationService.markAllAsRead(currentUser.id());
-        return ResponseEntity.ok(ApiResponse.success(null, "Toutes les notifications marquées comme lues"));
+        return ResponseEntity.ok(ApiSuccessResponse.<String>builder()
+                .success(true)
+                .message("Toutes les notifications marquées comme lues")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
     
     @Operation(summary = "Supprimer une notification")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<String>> deleteNotification(@PathVariable Long id) {
+    public ResponseEntity<ApiSuccessResponse<String>> deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "Notification supprimée"));
+        return ResponseEntity.ok(ApiSuccessResponse.<String>builder()
+                .success(true)
+                .message("Notification supprimée")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
     
+
     @Operation(summary = "Supprimer toutes les notifications lues")
     @DeleteMapping("/read")
-    public ResponseEntity<ApiResponse<String>> deleteReadNotifications() {
+    public ResponseEntity<ApiSuccessResponse<String>> deleteReadNotifications() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
         notificationService.deleteReadNotifications(currentUser.id());
-        return ResponseEntity.ok(ApiResponse.success(null, "Notifications lues supprimées"));
+        return ResponseEntity.ok(ApiSuccessResponse.<String>builder()
+                .success(true)
+                .message("Notifications lues supprimées")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
+
 }

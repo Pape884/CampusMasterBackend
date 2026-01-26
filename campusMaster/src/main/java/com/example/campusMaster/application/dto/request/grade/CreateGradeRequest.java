@@ -1,4 +1,4 @@
-package com.example.campusMaster.application.dto.request;
+package com.example.campusMaster.application.dto.request.grade;
 
 import jakarta.validation.constraints.NotNull;
 

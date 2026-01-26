@@ -3,13 +3,15 @@ package com.example.campusMaster.application.dto.response.departments;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.example.campusMaster.domain.entity.CourseModule;
+import com.example.campusMaster.application.dto.response.modules.ModuleResponse;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Builder;
 import lombok.Getter;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
-@Builder  
+@Builder
 public class DepartmentResponse {
      Long id;
      String name;
@@ -22,6 +24,6 @@ public class DepartmentResponse {
      Long teachersCount;
      Long modulesCount;
      Long coursesCount;
-     List<CourseModule> modules;
-    
+     List<ModuleResponse> modules;
+
 }

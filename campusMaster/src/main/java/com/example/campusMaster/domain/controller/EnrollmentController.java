@@ -12,12 +12,13 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.campusMaster.application.Services.EnrollmentService;
 import com.example.campusMaster.application.Services.UserService;
-import com.example.campusMaster.application.dto.request.EnrollmentRequest;
-import com.example.campusMaster.application.dto.response.ApiResponse;
-import com.example.campusMaster.application.dto.response.EnrollmentResponse;
-import com.example.campusMaster.application.dto.response.UserResponse;
+import com.example.campusMaster.application.dto.request.enrollement.EnrollmentRequest;
+import com.example.campusMaster.application.dto.response.enrollement.EnrollmentResponse;
+import com.example.campusMaster.application.dto.response.users.UserResponse;
+import com.example.campusMaster.infrastructure.exception.ApiSuccessResponse;
 import com.example.campusMaster.infrastructure.security.SecurityUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -33,7 +34,7 @@ public class EnrollmentController {
     @Operation(summary = "S'inscrire à un cours (STUDENT)")
     @PostMapping
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
-    public ResponseEntity<ApiResponse<EnrollmentResponse>> enrollToCourse(
+    public ResponseEntity<ApiSuccessResponse<EnrollmentResponse>> enrollToCourse(
             @Valid @RequestBody EnrollmentRequest request
     ) {
         String email = SecurityUtils.getCurrentUserEmail();
@@ -46,48 +47,73 @@ public class EnrollmentController {
         
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(enrollment, "Inscription réussie"));
+                .body(ApiSuccessResponse.<EnrollmentResponse>builder()
+                        .success(true)
+                        .message("Inscription réussie")
+                        .data(enrollment)
+                        .timestamp(LocalDateTime.now())
+                        .build());
     }
     
     @Operation(summary = "Se désinscrire d'un cours (STUDENT)")
     @DeleteMapping("/{enrollmentId}")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
-    public ResponseEntity<ApiResponse<String>> unenrollFromCourse(
+    public ResponseEntity<ApiSuccessResponse<String>> unenrollFromCourse(
             @PathVariable Long enrollmentId
     ) {
         enrollmentService.unenrollStudent(enrollmentId);
-        return ResponseEntity.ok(ApiResponse.success(null, "Désinscription réussie"));
+        return ResponseEntity.ok(ApiSuccessResponse.<String>builder()
+                .success(true)
+                .message("Désinscription réussie")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
     
     @Operation(summary = "Lister mes inscriptions (STUDENT)")
     @GetMapping("/my-enrollments")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<ApiResponse<List<EnrollmentResponse>>> getMyEnrollments() {
+    public ResponseEntity<ApiSuccessResponse<List<EnrollmentResponse>>> getMyEnrollments() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
         List<EnrollmentResponse> enrollments = 
             enrollmentService.getEnrollmentsByStudent(currentUser.id());
-        return ResponseEntity.ok(ApiResponse.success(enrollments));
+        return ResponseEntity.ok(ApiSuccessResponse.<List<EnrollmentResponse>>builder()
+                .success(true)
+                .message("Inscriptions récupérées")
+                .data(enrollments)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
     
     @Operation(summary = "Lister les inscriptions d'un cours (TEACHER/ADMIN)")
     @GetMapping("/course/{courseId}")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
-    public ResponseEntity<ApiResponse<List<EnrollmentResponse>>> getEnrollmentsByCourse(
+    public ResponseEntity<ApiSuccessResponse<List<EnrollmentResponse>>> getEnrollmentsByCourse(
             @PathVariable Long courseId
     ) {
         List<EnrollmentResponse> enrollments = 
             enrollmentService.getEnrollmentsByCourse(courseId);
-        return ResponseEntity.ok(ApiResponse.success(enrollments));
+        return ResponseEntity.ok(ApiSuccessResponse.<List<EnrollmentResponse>>builder()
+                .success(true)
+                .message("Inscriptions récupérées")
+                .data(enrollments)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
     
     @Operation(summary = "Nombre d'inscrits à un cours")
     @GetMapping("/course/{courseId}/count")
-    public ResponseEntity<ApiResponse<Long>> countEnrollmentsByCourse(
+    public ResponseEntity<ApiSuccessResponse<Long>> countEnrollmentsByCourse(
             @PathVariable Long courseId
     ) {
         Long count = enrollmentService.countEnrollmentsByCourse(courseId);
-        return ResponseEntity.ok(ApiResponse.success(count));
+        return ResponseEntity.ok(ApiSuccessResponse.<Long>builder()
+                .success(true)
+                .message("Nombre d'inscrits récupéré")
+                .data(count)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 }
 

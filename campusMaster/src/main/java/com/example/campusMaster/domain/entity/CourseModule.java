@@ -52,6 +52,7 @@ public class CourseModule {
     // Relations
 
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<Course> courses = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

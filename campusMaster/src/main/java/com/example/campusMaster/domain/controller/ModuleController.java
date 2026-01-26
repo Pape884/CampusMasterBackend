@@ -11,10 +11,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.campusMaster.application.Services.ModuleService;
-import com.example.campusMaster.application.dto.request.CreateModuleRequest;
-import com.example.campusMaster.application.dto.response.ApiResponse;
-import com.example.campusMaster.application.dto.response.ModuleResponse;
+import com.example.campusMaster.application.dto.request.modules.RegisterModuleDTO;
+import com.example.campusMaster.application.dto.request.modules.UpdateModuleDTO;
+import com.example.campusMaster.application.dto.response.modules.ModuleResponse;
+import com.example.campusMaster.infrastructure.exception.ApiSuccessResponse;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -29,55 +31,84 @@ public class ModuleController {
     @Operation(summary = "Créer un module (ADMIN)")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<ModuleResponse>> createModule(
-            @Valid @RequestBody CreateModuleRequest request
+    public ResponseEntity<ApiSuccessResponse<ModuleResponse>> createModule(
+            @Valid @RequestBody RegisterModuleDTO request
     ) {
         ModuleResponse module = moduleService.createModule(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(module, "Module créé"));
+                .body(ApiSuccessResponse.<ModuleResponse>builder()
+                        .success(true)
+                        .message("Module créé")
+                        .data(module)
+                        .timestamp(LocalDateTime.now())
+                        .build());
     }
     
     @Operation(summary = "Modifier un module (ADMIN)")
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<ModuleResponse>> updateModule(
+    public ResponseEntity<ApiSuccessResponse<ModuleResponse>> updateModule(
             @PathVariable Long id,
-            @RequestParam String name,
-            @RequestParam String description
+            UpdateModuleDTO request
     ) {
-        ModuleResponse module = moduleService.updateModule(id, name, description);
-        return ResponseEntity.ok(ApiResponse.success(module, "Module mis à jour"));
+        ModuleResponse module = moduleService.updateModule(id, request);
+        return ResponseEntity.ok(ApiSuccessResponse.<ModuleResponse>builder()
+                .success(true)
+                .message("Module mis à jour")
+                .data(module)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
     
     @Operation(summary = "Récupérer un module par ID")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ModuleResponse>> getModuleById(@PathVariable Long id) {
+    public ResponseEntity<ApiSuccessResponse<ModuleResponse>> getModuleById(@PathVariable Long id) {
         ModuleResponse module = moduleService.getModuleById(id);
-        return ResponseEntity.ok(ApiResponse.success(module));
+        return ResponseEntity.ok(ApiSuccessResponse.<ModuleResponse>builder()
+                .success(true)
+                .message("Module récupéré")
+                .data(module)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
     
     @Operation(summary = "Lister tous les modules")
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ModuleResponse>>> getAllModules() {
+    public ResponseEntity<ApiSuccessResponse<List<ModuleResponse>>> getAllModules() {
         List<ModuleResponse> modules = moduleService.getAllModules();
-        return ResponseEntity.ok(ApiResponse.success(modules));
+        return ResponseEntity.ok(ApiSuccessResponse.<List<ModuleResponse>>builder()
+                .success(true)
+                .message("Modules récupérés")
+                .data(modules)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
     
     @Operation(summary = "Lister les modules d'un département")
     @GetMapping("/department/{departmentId}")
-    public ResponseEntity<ApiResponse<List<ModuleResponse>>> getModulesByDepartment(
+    public ResponseEntity<ApiSuccessResponse<List<ModuleResponse>>> getModulesByDepartment(
             @PathVariable Long departmentId
     ) {
         List<ModuleResponse> modules = moduleService.getModulesByDepartment(departmentId);
-        return ResponseEntity.ok(ApiResponse.success(modules));
+        return ResponseEntity.ok(ApiSuccessResponse.<List<ModuleResponse>>builder()
+                .success(true)
+                .message("Modules récupérés")
+                .data(modules)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
     
     @Operation(summary = "Supprimer un module (ADMIN)")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<String>> deleteModule(@PathVariable Long id) {
+    public ResponseEntity<ApiSuccessResponse<String>> deleteModule(@PathVariable Long id) {
         moduleService.deleteModule(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "Module supprimé"));
+        return ResponseEntity.ok(ApiSuccessResponse.<String>builder()
+                .success(true)
+                .message("Module supprimé")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 }

@@ -80,7 +80,7 @@ public class UserController {
             @RequestParam String nom) {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
-        UserResponse updated = userService.updateProfile(currentUser.id(), prenom, nom);
+        UserResponse updated = userService.updateProfile(currentUser.getId(), prenom, nom);
         return ResponseEntity.ok(updated);
     }
     
@@ -91,7 +91,7 @@ public class UserController {
             @RequestParam String newPassword) {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
-        userService.changePassword(currentUser.id(), oldPassword, newPassword);
+        userService.changePassword(currentUser.getId(), oldPassword, newPassword);
         return ResponseEntity.noContent().build();
     }
     
@@ -174,15 +174,15 @@ public class UserController {
     }
     
     private UserResponse convertToResponse(User user) {
-        return new UserResponse(
-                user.getId(),
-                user.getMatricule(),
-                user.getPrenom(),
-                user.getNom(),
-                user.getEmail(),
-                user.getTelephone(),
-                user.getRole(),
-                user.getIsActive()
-        );
+        return UserResponse.builder()
+                .id(user.getId())
+                .matricule(user.getMatricule())
+                .prenom(user.getPrenom())
+                .nom(user.getNom())
+                .email(user.getEmail())
+                .telephone(user.getTelephone())
+                .role(user.getRole())
+                .isActive(user.getIsActive())
+                .build();
     }
 }

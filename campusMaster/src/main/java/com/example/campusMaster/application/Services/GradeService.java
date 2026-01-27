@@ -140,17 +140,17 @@ public class GradeService {
      // ==================== MAPPER ====================
     
     private GradeResponse mapToResponse(Grade grade) {
-        UserResponse gradedBy = new UserResponse(
-                grade.getGradedBy().getId(),
-                grade.getGradedBy().getMatricule(),
-                grade.getGradedBy().getPrenom(),
-                grade.getGradedBy().getNom(),
-                grade.getGradedBy().getEmail(),
-                grade.getGradedBy().getTelephone(),
-                grade.getGradedBy().getRole(),
-                grade.getGradedBy().getIsActive()
-        );
-        
+        UserResponse gradedBy = UserResponse.builder()
+                .id(grade.getGradedBy().getId())
+                .matricule(grade.getGradedBy().getMatricule())
+                .prenom(grade.getGradedBy().getPrenom())
+                .nom(grade.getGradedBy().getNom())
+                .email(grade.getGradedBy().getEmail())
+                .telephone(grade.getGradedBy().getTelephone())
+                .role(grade.getGradedBy().getRole())
+                .isActive(grade.getGradedBy().getIsActive())
+                .build();
+
         return new GradeResponse(
                 grade.getId(),
                 grade.getPoints(),

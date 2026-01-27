@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/courses")
+@RequestMapping("/api/courses")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Courses", description = "Gestion des cours")
@@ -38,7 +38,7 @@ public class CourseController {
     ) {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
-        CourseResponse course = courseService.createCourse(request, currentUser.id());
+        CourseResponse course = courseService.createCourse(request, currentUser.getId());
 
         ApiSuccessResponse<CourseResponse> response = ApiSuccessResponse.<CourseResponse>builder()
                 .success(true)
@@ -118,7 +118,7 @@ public class CourseController {
     public ResponseEntity<ApiSuccessResponse<List<CourseResponse>>> getMyCourses() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
-        List<CourseResponse> courses = courseService.getCoursesByTeacher(currentUser.id());
+        List<CourseResponse> courses = courseService.getCoursesByTeacher(currentUser.getId());
         ApiSuccessResponse<List<CourseResponse>> response = ApiSuccessResponse.<List<CourseResponse>>builder()
                 .success(true)
                 .message("Cours récupérés avec succès")

@@ -1,11 +1,9 @@
 package com.example.campusMaster.application.Services;
 
 import com.example.campusMaster.application.dto.request.LoginRequest;
-import com.example.campusMaster.application.dto.request.users.ResisterRequest;
 import com.example.campusMaster.application.dto.response.AuthResponse;
 import com.example.campusMaster.application.dto.response.users.UserResponse;
 import com.example.campusMaster.domain.entity.User;
-import com.example.campusMaster.infrastructure.exception.ResourceAlreadyExistsException;
 import com.example.campusMaster.infrastructure.exception.ResourceNotFoundException;
 import com.example.campusMaster.infrastructure.persistence.repository.UserRepository;
 import com.example.campusMaster.infrastructure.security.JwtTokenProvider;
@@ -26,37 +24,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
-    
-    /**
-     * Inscription d'un nouvel utilisateur
-     */
-    public AuthResponse register(ResisterRequest request) {
-        // Vérifier si l'email existe déjà
-        if (userRepository.existsByEmail(request.email())) {
-            throw new ResourceAlreadyExistsException("Email déjà utilisé");
-        }
-        
-        // Créer l'utilisateur
-        User user = User.builder()
-            .prenom(request.prenom())
-            .nom(request.nom())
-            .email(request.email())
-            .password(passwordEncoder.encode(request.password()))
-            .role(request.role())
-            .isActive(true)
-            .build();
-        
-        User savedUser = userRepository.save(user);
-        
-        // Générer les tokens
-        String token = jwtTokenProvider.generateToken(savedUser.getEmail());
-        String refreshToken = jwtTokenProvider.generateRefreshToken(savedUser.getEmail());
-        
-        UserResponse userResponse = mapToUserResponse(savedUser);
-        
-        return new AuthResponse(token, refreshToken, userResponse);
-    }
-    
+   
     /**
      * Connexion d'un utilisateur
      */
@@ -121,16 +89,16 @@ public class AuthService {
      * Mapper User vers UserResponse
      */
     private UserResponse mapToUserResponse(User user) {
-        return new UserResponse(
-            user.getId(),
-            user.getMatricule(),
-            user.getPrenom(),
-            user.getNom(),
-            user.getEmail(),
-            user.getTelephone(),
-            user.getRole(),
-            user.getIsActive()
-        );
+        return UserResponse.builder()
+            .id(user.getId())
+            .matricule(user.getMatricule())
+            .prenom(user.getPrenom())
+            .nom(user.getNom())
+            .email(user.getEmail())
+            .telephone(user.getTelephone())
+            .role(user.getRole())
+            .isActive(user.getIsActive())
+            .build();
     }
 }
 

@@ -19,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/submissions")
+@RequestMapping("/api/submissions")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Submissions", description = "Gestion des rendus de devoirs")
@@ -41,7 +41,7 @@ public class SubmissionController {
         
         SubmissionResponse submission = submissionService.submitAssignment(
             assignmentId, 
-            currentUser.id(), 
+            currentUser.getId(), 
             file, 
             comments
         );
@@ -118,7 +118,7 @@ public class SubmissionController {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
         List<SubmissionResponse> submissions = 
-            submissionService.getSubmissionsByStudent(currentUser.id());
+            submissionService.getSubmissionsByStudent(currentUser.getId());
 
             ApiSuccessResponse<List<SubmissionResponse>> response = ApiSuccessResponse.<List<SubmissionResponse>>builder()
                     .success(true)

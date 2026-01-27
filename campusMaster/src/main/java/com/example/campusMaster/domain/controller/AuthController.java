@@ -2,7 +2,6 @@ package com.example.campusMaster.domain.controller;
 
 import com.example.campusMaster.application.Services.AuthService;
 import com.example.campusMaster.application.dto.request.LoginRequest;
-import com.example.campusMaster.application.dto.request.users.ResisterRequest;
 import com.example.campusMaster.application.dto.response.AuthResponse;
 import com.example.campusMaster.infrastructure.exception.ApiSuccessResponse;
 
@@ -10,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,25 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Authentication", description = "Endpoints d'authentification")
 public class AuthController {
     private final AuthService authService;
-    
-    @Operation(summary = "Inscription d'un nouvel utilisateur")
-    @PostMapping("/register")
-    public ResponseEntity<ApiSuccessResponse<AuthResponse>> register(
-            @Valid @RequestBody ResisterRequest request
-    ) {
-        AuthResponse response = authService.register(request);
-
-        ApiSuccessResponse<AuthResponse> apiResponse = ApiSuccessResponse.<AuthResponse>builder()
-                .success(true)
-                .message("Inscription réussie")
-                .data(response)
-                .timestamp(java.time.LocalDateTime.now())
-                .build();
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(apiResponse);
-    }
-    
+ 
     @Operation(summary = "Connexion utilisateur")
     @PostMapping("/login")
     public ResponseEntity<ApiSuccessResponse<AuthResponse>> login(

@@ -216,16 +216,17 @@ public class AnnouncementService {
     // ==================== MAPPER ====================
     
     private AnnouncementResponse mapToResponse(Announcement announcement) {
-        UserResponse author = new UserResponse(
-                announcement.getAuthor().getId(),
-                announcement.getAuthor().getMatricule(),
-                announcement.getAuthor().getPrenom(),
-                announcement.getAuthor().getNom(),
-                announcement.getAuthor().getEmail(),
-                announcement.getAuthor().getTelephone(), null, 
-                announcement.getAuthor().getIsActive()
-        );
-        
+        UserResponse author = UserResponse.builder()
+                .id(announcement.getAuthor().getId())
+                .matricule(announcement.getAuthor().getMatricule())
+                .prenom(announcement.getAuthor().getPrenom())
+                .nom(announcement.getAuthor().getNom())
+                .email(announcement.getAuthor().getEmail())
+                .telephone(announcement.getAuthor().getTelephone())
+                .role(announcement.getAuthor().getRole())
+                .isActive(announcement.getAuthor().getIsActive())
+                .build();
+
         return new AnnouncementResponse(
                 announcement.getId(),
                 announcement.getTitle(),

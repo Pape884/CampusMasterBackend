@@ -227,17 +227,17 @@ public class SubmissionService {
     private SubmissionResponse mapToResponse(Submission submission) {
         User student = submission.getStudent();
         
-        UserResponse studentResponse = new UserResponse(
-            student.getId(),
-            student.getMatricule(),
-            student.getPrenom(),
-            student.getNom(),
-            student.getEmail(),
-            student.getTelephone(),
-            student.getRole(),
-            student.getIsActive()
-        );
-        
+        UserResponse studentResponse = UserResponse.builder()
+                .id(student.getId())
+                .matricule(student.getMatricule())
+                .prenom(student.getPrenom())
+                .nom(student.getNom())
+                .email(student.getEmail())
+                .telephone(student.getTelephone())
+                .role(student.getRole())
+                .isActive(student.getIsActive())
+                .build();
+
         return new SubmissionResponse(
             submission.getId(),
             submission.getFileUrl(),

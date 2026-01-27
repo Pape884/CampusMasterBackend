@@ -9,14 +9,15 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "enrollments", 
     uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"student_id", "course_id"})
+        @UniqueConstraint(columnNames = {"user_id", "module_id"})
     },
     indexes = {
-        @Index(name = "idx_enrollment_student", columnList = "student_id"),
-        @Index(name = "idx_enrollment_course", columnList = "course_id")
+        @Index(name = "idx_enrollment_user", columnList = "user_id"),
+        @Index(name = "idx_enrollment_module", columnList = "module_id")
     }
 )
-@Getter @Setter
+@Getter 
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -39,12 +40,12 @@ public class Enrollment {
     
     // Relations
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false)
-    private User student;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "module_id", nullable = false)
+    private CourseModule module;
     
     // Méthodes métier
     public void enroll() {

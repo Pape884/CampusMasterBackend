@@ -7,29 +7,29 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.example.campusMaster.domain.entity.Course;
+import com.example.campusMaster.domain.entity.CourseModule;
 import com.example.campusMaster.domain.entity.Enrollment;
 import com.example.campusMaster.domain.entity.User;
 
 @Repository
 public interface EnrollementRepository extends JpaRepository <Enrollment, Long>{
-    List<Enrollment> findByStudent(User student);
+    List<Enrollment> findByUser(User user);
     
-    List<Enrollment> findByCourse(Course course);
+    List<Enrollment> findByModule(Module module);
     
-    Optional<Enrollment> findByStudentAndCourse(User student, Course course);
+    Optional<Enrollment> findByUserAndModule(User user, Module module);
     
     List<Enrollment> findByIsActive(Boolean isActive);
     
-    @Query("SELECT e FROM Enrollment e WHERE e.student.id = :studentId AND e.isActive = true")
-    List<Enrollment> findActiveEnrollmentsByStudentId(Long studentId);
+    @Query("SELECT e FROM Enrollment e WHERE e.user.id = :userId AND e.isActive = true")
+    List<Enrollment> findActiveEnrollmentsByUserId(Long userId);
     
-    @Query("SELECT e FROM Enrollment e WHERE e.course.id = :courseId AND e.isActive = true")
-    List<Enrollment> findActiveEnrollmentsByCourseId(Long courseId);
+    @Query("SELECT e FROM Enrollment e WHERE e.module.id = :moduleId AND e.isActive = true")
+    List<Enrollment> findActiveEnrollmentsByModuleId(Long moduleId);
     
-    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.id = :courseId AND e.isActive = true")
-    Long countActiveEnrollmentsByCourseId(Long courseId);
+    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.module.id = :moduleId AND e.isActive = true")
+    Long countActiveEnrollmentsByModuleId(Long moduleId);
     
-    boolean existsByStudentAndCourse(User student, Course course);
+    boolean existsByUserAndModule(User user, CourseModule module);
 
 }

@@ -1,6 +1,8 @@
 package com.example.campusMaster.application.Services;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -14,12 +16,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.campusMaster.application.dto.request.users.CreateUserRequest;
 import com.example.campusMaster.application.dto.request.users.UpdateUserRequest;
+import com.example.campusMaster.application.dto.response.enrollement.EnrollmentResponse;
+import com.example.campusMaster.application.dto.response.modules.ModuleResponse;
 import com.example.campusMaster.application.dto.response.users.UserResponse;
 import com.example.campusMaster.application.dto.response.users.UserStats;
+import com.example.campusMaster.domain.entity.CourseModule;
+import com.example.campusMaster.domain.entity.Enrollment;
 import com.example.campusMaster.domain.entity.User;
 import com.example.campusMaster.domain.enums.Role;
 import com.example.campusMaster.infrastructure.exception.ResourceAlreadyExistsException;
 import com.example.campusMaster.infrastructure.exception.ResourceNotFoundException;
+import com.example.campusMaster.infrastructure.persistence.repository.DepartmentRepository;
+import com.example.campusMaster.infrastructure.persistence.repository.EnrollementRepository;
+import com.example.campusMaster.infrastructure.persistence.repository.ModuleRepository;
 import com.example.campusMaster.infrastructure.persistence.repository.UserRepository;
 
 import jakarta.persistence.criteria.Predicate;
@@ -29,69 +38,71 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional
 public class UserService {
-    
+
     private final UserRepository userRepository;
+    private final ModuleRepository moduleRepository;
+    private final DepartmentRepository departmentRepository;
+    private final EnrollementRepository enrollmentRepository;
     private final PasswordEncoder passwordEncoder;
-    
+
     // Méthode avec pagination et filtres
-    public Page<User> getUsers(String search, String role, Boolean isActive, 
-                                int page, int limit, String sortBy, String sortOrder) {
-        
-        Sort sort = sortOrder.equalsIgnoreCase("asc") 
-            ? Sort.by(sortBy).ascending() 
-            : Sort.by(sortBy).descending();
-        
+    public Page<User> getUsers(String search, String role, Boolean isActive,
+            int page, int limit, String sortBy, String sortOrder) {
+
+        Sort sort = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
         int pageIndex = Math.max(page - 1, 0);
         Pageable pageable = PageRequest.of(pageIndex, limit, sort);
-        
+
         Specification<User> spec = (root, query, criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.conjunction();
-            
+
             // Recherche par nom, prénom ou email
             if (search != null && !search.isEmpty()) {
                 String searchPattern = "%" + search.toLowerCase() + "%";
                 Predicate searchPredicate = criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("matricule")), searchPattern),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("nom")), searchPattern),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("prenom")), searchPattern),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), searchPattern)
-                );
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("matricule")), searchPattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("nom")), searchPattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("prenom")), searchPattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), searchPattern));
                 predicate = criteriaBuilder.and(predicate, searchPredicate);
             }
-            
+
             // Filtre par rôle
             if (role != null && !role.isEmpty()) {
                 try {
                     Role roleEnum = Role.valueOf(role.toUpperCase());
-                    predicate = criteriaBuilder.and(predicate, 
-                        criteriaBuilder.equal(root.get("role"), roleEnum));
+                    predicate = criteriaBuilder.and(predicate,
+                            criteriaBuilder.equal(root.get("role"), roleEnum));
                 } catch (IllegalArgumentException e) {
                     // Ignorer si le rôle est invalide
                 }
             }
-            
+
             // Filtre par statut actif/inactif
             if (isActive != null) {
-                predicate = criteriaBuilder.and(predicate, 
-                    criteriaBuilder.equal(root.get("isActive"), isActive));
+                predicate = criteriaBuilder.and(predicate,
+                        criteriaBuilder.equal(root.get("isActive"), isActive));
             }
-            
+
             return predicate;
         };
-        
+
         return userRepository.findAll(spec, pageable);
     }
-    
+
     // Statistiques des utilisateurs
     public UserStats getUserStats() {
         long total = userRepository.count();
         long active = userRepository.countByIsActive(true);
         long inactive = userRepository.countByIsActive(false);
-        
+
         long students = userRepository.countByRole(Role.STUDENT);
         long teachers = userRepository.countByRole(Role.TEACHER);
         long admins = userRepository.countByRole(Role.ADMIN);
-        
+
         return UserStats.builder()
                 .totalUsers(total)
                 .activeUsers(active)
@@ -101,108 +112,132 @@ public class UserService {
                 .adminsCount(admins)
                 .build();
     }
-    
+
     // Recherche simple
     public List<UserResponse> searchUsers(String query) {
         String searchPattern = "%" + query.toLowerCase() + "%";
-        
-        Specification<User> spec = (root, q, criteriaBuilder) -> 
-            criteriaBuilder.or(
+
+        Specification<User> spec = (root, q, criteriaBuilder) -> criteriaBuilder.or(
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("matricule")), searchPattern),
                 criteriaBuilder.like(criteriaBuilder.lower(root.get("nom")), searchPattern),
                 criteriaBuilder.like(criteriaBuilder.lower(root.get("prenom")), searchPattern),
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), searchPattern)
-            );
-        
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), searchPattern));
+
         return userRepository.findAll(spec).stream()
-                .map(this::mapToResponse)
+                .map(this::mapAllUsersResponse)
                 .collect(Collectors.toList());
     }
-    
-    // Créer un utilisateur
+
+    @Transactional
     public UserResponse createUser(CreateUserRequest request) {
+
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ResourceAlreadyExistsException("Un utilisateur avec cet email existe déjà");
         }
-        
+
         User user = User.builder()
+                .matricule(request.getMatricule())
                 .prenom(request.getPrenom())
                 .nom(request.getNom())
                 .email(request.getEmail())
+                .telephone(request.getTelephone())
                 .role(request.getRole())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .isActive(true)
                 .build();
-        
-        User saved = userRepository.save(user);
-        return mapToResponse(saved);
+
+        // Sauvegarde du user d'abord
+        User savedUser = userRepository.save(user);
+
+        // Création des enrollments
+        if (request.getModules() != null && !request.getModules().isEmpty()) {
+
+            Set<Enrollment> enrollments = request.getModules().stream()
+                    .map(moduleId -> {
+                        CourseModule module = moduleRepository.findById(Long.valueOf(moduleId))
+                                .orElseThrow(() -> new ResourceNotFoundException("Module introuvable"));
+
+                        return Enrollment.builder()
+                                .user(savedUser)
+                                .module(module)
+                                .isActive(true)
+                                .enrolledAt(LocalDateTime.now())
+                                .build();
+                    })
+                    .collect(Collectors.toSet());
+
+            savedUser.setEnrollments(enrollments);
+        }
+
+        return mapToResponse(savedUser);
     }
-    
+
     // Mettre à jour un utilisateur
     public UserResponse updateUser(Long id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
-        
+
         // Vérifier si l'email est déjà utilisé par un autre utilisateur
-        if (!user.getEmail().equals(request.getEmail()) && 
-            userRepository.existsByEmail(request.getEmail())) {
+        if (!user.getEmail().equals(request.getEmail()) &&
+                userRepository.existsByEmail(request.getEmail())) {
             throw new ResourceAlreadyExistsException("Cet email est déjà utilisé");
         }
-        
+
         user.setPrenom(request.getPrenom());
         user.setNom(request.getNom());
         user.setEmail(request.getEmail());
-        
+        user.setTelephone(request.getTelephone());
+
         if (request.getRole() != null) {
             user.setRole(request.getRole());
         }
-        
+
         User updated = userRepository.save(user);
         return mapToResponse(updated);
     }
-    
+
     // Mettre à jour le statut
     public UserResponse updateStatus(Long id, Boolean isActive) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
-        
+
         user.setIsActive(isActive);
         User updated = userRepository.save(user);
         return mapToResponse(updated);
     }
-    
-    // Supprimer un utilisateur
+
     public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Utilisateur introuvable");
-        }
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
+
+        userRepository.delete(user);
     }
-    
+
     // Méthodes existantes
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         return mapToResponse(user);
     }
-    
+
     public UserResponse getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         return mapToResponse(user);
     }
-    
+
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
-    
+
     public List<UserResponse> getUsersByRole(Role role) {
         return userRepository.findByRole(role).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
-    
+
     public UserResponse updateProfile(Long userId, String prenom, String nom) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
@@ -211,48 +246,90 @@ public class UserService {
         User updated = userRepository.save(user);
         return mapToResponse(updated);
     }
-    
+
     public void changePassword(Long userId, String oldPassword, String newPassword) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
-        
+
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new RuntimeException("Ancien mot de passe incorrect");
         }
-        
+
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
-    
+
     public void deactivateUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         user.setIsActive(false);
         userRepository.save(user);
     }
-    
+
     public void activateUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
         user.setIsActive(true);
         userRepository.save(user);
     }
-    
+
     public Long countUsersByRole(Role role) {
         return userRepository.countByRole(role);
     }
-    
+
+
+
     // Mapper
+
+    private ModuleResponse mapModule(CourseModule module) {
+        return ModuleResponse.builder()
+                .id(module.getId())
+                .code(module.getCode())
+                .name(module.getName())
+                .semestre(module.getSemestre())
+                .build();
+    }
+
+    private EnrollmentResponse mapEnrollment(Enrollment enrollment) {
+        return EnrollmentResponse.builder()
+                .id(enrollment.getId())
+                .module(mapModule(enrollment.getModule()))
+                .enrolledAt(enrollment.getEnrolledAt())
+                .isActive(enrollment.getIsActive())
+                .finalGrade(enrollment.getFinalGrade())
+                .build();
+
+    }
     private UserResponse mapToResponse(User user) {
-        return new UserResponse(
-                user.getId(),
-                user.getMatricule(),
-                user.getPrenom(),
-                user.getNom(),
-                user.getEmail(),
-                user.getTelephone(),
-                user.getRole(),
-                user.getIsActive()
-        );
+
+        List<EnrollmentResponse> enrollments = user.getEnrollments()
+                .stream()
+                .map(this::mapEnrollment)
+                .toList();
+
+        return UserResponse.builder()
+                .id(user.getId())
+                .matricule(user.getMatricule())
+                .prenom(user.getPrenom())
+                .nom(user.getNom())
+                .email(user.getEmail())
+                .telephone(user.getTelephone())
+                .role(user.getRole())
+                .isActive(user.getIsActive())
+                .enrollments(enrollments)
+                .build();
+    }
+
+    private UserResponse mapAllUsersResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .matricule(user.getMatricule())
+                .prenom(user.getPrenom())
+                .nom(user.getNom())
+                .email(user.getEmail())
+                .telephone(user.getTelephone())
+                .role(user.getRole())
+                .isActive(user.getIsActive())
+                .build();
     }
 }

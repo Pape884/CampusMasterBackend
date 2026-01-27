@@ -74,7 +74,7 @@ public class User {
     private Department department;
 
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<Enrollment> enrollments = new HashSet<>();
     

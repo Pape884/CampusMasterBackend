@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-CampusMasterApplication<campusMaster>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.campusMaster.CampusMasterApplication",
+            "projectName": "campusMaster",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

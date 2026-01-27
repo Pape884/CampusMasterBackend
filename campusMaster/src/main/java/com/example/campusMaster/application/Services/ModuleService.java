@@ -184,7 +184,7 @@ public class ModuleService {
                 .id(module.getId())
                 .name(module.getName())
                 .code(module.getCode())
-                .department(departmentResponse)
+                .departmentId(module.getDepartment().getId())
                 .build();
     }
 

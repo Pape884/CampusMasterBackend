@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/messages")
+@RequestMapping("/api/messages")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Messages", description = "Messagerie interne")
@@ -40,7 +40,7 @@ public class MessageController {
         UserResponse currentUser = userService.getUserByEmail(email);
         
         MessageResponse message = messageService.sendMessage(
-            currentUser.id(), 
+            currentUser.getId(), 
             request.receiverId(), 
             request.subject(), 
             request.content(), 
@@ -62,7 +62,7 @@ public class MessageController {
     public ResponseEntity<ApiSuccessResponse<List<MessageResponse>>> getReceivedMessages() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
-        List<MessageResponse> messages = messageService.getReceivedMessages(currentUser.id());
+        List<MessageResponse> messages = messageService.getReceivedMessages(currentUser.getId());
         return ResponseEntity.ok(ApiSuccessResponse.<List<MessageResponse>>builder()
                 .success(true)
                 .message("Messages reçus récupérés")
@@ -76,7 +76,7 @@ public class MessageController {
     public ResponseEntity<ApiSuccessResponse<List<MessageResponse>>> getSentMessages() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
-        List<MessageResponse> messages = messageService.getSentMessages(currentUser.id());
+        List<MessageResponse> messages = messageService.getSentMessages(currentUser.getId());
         return ResponseEntity.ok(ApiSuccessResponse.<List<MessageResponse>>builder()
                 .success(true)
                 .message("Messages envoyés récupérés")
@@ -90,7 +90,7 @@ public class MessageController {
     public ResponseEntity<ApiSuccessResponse<List<MessageResponse>>> getUnreadMessages() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
-        List<MessageResponse> messages = messageService.getUnreadMessages(currentUser.id());
+        List<MessageResponse> messages = messageService.getUnreadMessages(currentUser.getId());
         return ResponseEntity.ok(ApiSuccessResponse.<List<MessageResponse>>builder()
                 .success(true)
                 .message("Messages non lus récupérés")
@@ -104,7 +104,7 @@ public class MessageController {
     public ResponseEntity<ApiSuccessResponse<Long>> countUnreadMessages() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
-        Long count = messageService.countUnreadMessages(currentUser.id());
+        Long count = messageService.countUnreadMessages(currentUser.getId());
         return ResponseEntity.ok(ApiSuccessResponse.<Long>builder()
                 .success(true)
                 .message("Nombre de messages non lus récupéré")
@@ -133,7 +133,7 @@ public class MessageController {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
         List<MessageResponse> messages = 
-            messageService.getConversation(currentUser.id(), userId);
+            messageService.getConversation(currentUser.getId(), userId);
         return ResponseEntity.ok(ApiSuccessResponse.<List<MessageResponse>>builder()
                 .success(true)
                 .message("Conversation récupérée")

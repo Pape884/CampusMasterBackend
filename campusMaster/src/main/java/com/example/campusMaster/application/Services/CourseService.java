@@ -113,15 +113,16 @@ public class CourseService {
     // Mapper
     private CourseResponse mapToResponse(Course course) {
 
-        UserResponse teacher = new UserResponse(
-            course.getTeacher().getId(), 
-            course.getTeacher().getMatricule(),
-            course.getTeacher().getPrenom(), 
-            course.getTeacher().getNom(), 
-            course.getTeacher().getEmail(),
-            course.getTeacher().getTelephone(), 
-            course.getTeacher().getRole(), 
-            course.getTeacher().getIsActive());
+        UserResponse teacher = UserResponse.builder()
+                .id(course.getTeacher().getId())
+                .matricule(course.getTeacher().getMatricule())
+                .prenom(course.getTeacher().getPrenom())
+                .nom(course.getTeacher().getNom())
+                .email(course.getTeacher().getEmail())
+                .telephone(course.getTeacher().getTelephone())
+                .role(course.getTeacher().getRole())
+                .isActive(course.getTeacher().getIsActive())
+                .build();
 
         return CourseResponse.builder()
                 .id(course.getId())

@@ -41,7 +41,7 @@ public class AnnouncementController {
 
         AnnouncementResponse announcement = announcementService.createAnnouncement(
                 request,
-                currentUser.id());
+                currentUser.getId());
 
         ApiSuccessResponse<AnnouncementResponse> response = ApiSuccessResponse.<AnnouncementResponse>builder()
                 .success(true)

@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/enrollments")
+@RequestMapping("/api/enrollments")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Enrollments", description = "Gestion des inscriptions aux cours")
@@ -40,9 +40,9 @@ public class EnrollmentController {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
         
-        EnrollmentResponse enrollment = enrollmentService.enrollStudent(
-            currentUser.id(), 
-            request.courseId()
+        EnrollmentResponse enrollment = enrollmentService.enrollUser(
+            currentUser.getId(), 
+            request.moduleId()
         );
         
         return ResponseEntity
@@ -77,7 +77,7 @@ public class EnrollmentController {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
         List<EnrollmentResponse> enrollments = 
-            enrollmentService.getEnrollmentsByStudent(currentUser.id());
+            enrollmentService.getEnrollmentsByUser(currentUser.getId());
         return ResponseEntity.ok(ApiSuccessResponse.<List<EnrollmentResponse>>builder()
                 .success(true)
                 .message("Inscriptions récupérées")
@@ -85,15 +85,15 @@ public class EnrollmentController {
                 .timestamp(LocalDateTime.now())
                 .build());
     }
-    
-    @Operation(summary = "Lister les inscriptions d'un cours (TEACHER/ADMIN)")
-    @GetMapping("/course/{courseId}")
+
+    @Operation(summary = "Lister les inscriptions d'un module (TEACHER/ADMIN)")
+    @GetMapping("/module/{moduleId}")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
-    public ResponseEntity<ApiSuccessResponse<List<EnrollmentResponse>>> getEnrollmentsByCourse(
-            @PathVariable Long courseId
+    public ResponseEntity<ApiSuccessResponse<List<EnrollmentResponse>>> getEnrollmentsByModule(
+            @PathVariable Long moduleId
     ) {
         List<EnrollmentResponse> enrollments = 
-            enrollmentService.getEnrollmentsByCourse(courseId);
+            enrollmentService.getEnrollmentsByModule(moduleId);
         return ResponseEntity.ok(ApiSuccessResponse.<List<EnrollmentResponse>>builder()
                 .success(true)
                 .message("Inscriptions récupérées")
@@ -102,12 +102,12 @@ public class EnrollmentController {
                 .build());
     }
     
-    @Operation(summary = "Nombre d'inscrits à un cours")
-    @GetMapping("/course/{courseId}/count")
-    public ResponseEntity<ApiSuccessResponse<Long>> countEnrollmentsByCourse(
-            @PathVariable Long courseId
+    @Operation(summary = "Nombre d'inscrits à un module")
+    @GetMapping("/module/{moduleId}/count")
+    public ResponseEntity<ApiSuccessResponse<Long>> countEnrollmentsByModule(
+            @PathVariable Long moduleId
     ) {
-        Long count = enrollmentService.countEnrollmentsByCourse(courseId);
+        Long count = enrollmentService.countEnrollmentsByModule(moduleId);
         return ResponseEntity.ok(ApiSuccessResponse.<Long>builder()
                 .success(true)
                 .message("Nombre d'inscrits récupéré")

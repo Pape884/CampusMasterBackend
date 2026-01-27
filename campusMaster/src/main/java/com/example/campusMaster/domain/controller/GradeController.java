@@ -29,7 +29,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/grades")
+@RequestMapping("/api/grades")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Grades", description = "Gestion des notes")
@@ -50,7 +50,7 @@ public class GradeController {
         
         GradeResponse grade = gradeService.gradeSubmission(
             submissionId, 
-            currentUser.id(), 
+            currentUser.getId(), 
             request
         );
         
@@ -98,7 +98,7 @@ public class GradeController {
     public ResponseEntity<ApiSuccessResponse<List<GradeResponse>>> getMyGrades() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
-        List<GradeResponse> grades = gradeService.getGradesByStudent(currentUser.id());
+        List<GradeResponse> grades = gradeService.getGradesByStudent(currentUser.getId());
         return ResponseEntity.ok(ApiSuccessResponse.<List<GradeResponse>>builder()
                 .success(true)
                 .message("Notes récupérées")

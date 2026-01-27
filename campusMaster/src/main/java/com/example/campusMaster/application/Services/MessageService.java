@@ -175,28 +175,28 @@ public class MessageService {
     // ==================== MAPPER ====================
     
     private MessageResponse mapToResponse(Message message) {
-        UserResponse sender = new UserResponse(
-                message.getSender().getId(),
-                message.getSender().getMatricule(),
-                message.getSender().getPrenom(),
-                message.getSender().getNom(),
-                message.getSender().getEmail(),
-                message.getSender().getTelephone(),
-                message.getSender().getRole(),
-                message.getSender().getIsActive()
-        );
+        UserResponse sender = UserResponse.builder()
+                .id(message.getSender().getId())
+                .matricule(message.getSender().getMatricule())
+                .prenom(message.getSender().getPrenom())
+                .nom(message.getSender().getNom())
+                .email(message.getSender().getEmail())
+                .telephone(message.getSender().getTelephone())
+                .role(message.getSender().getRole())
+                .isActive(message.getSender().getIsActive())
+                .build();
 
-        UserResponse receiver = new UserResponse(
-                message.getReceiver().getId(),
-                message.getReceiver().getMatricule(),
-                message.getReceiver().getPrenom(),
-                message.getReceiver().getNom(),
-                message.getReceiver().getEmail(),
-                message.getReceiver().getTelephone(),
-                message.getReceiver().getRole(),
-                message.getReceiver().getIsActive()
-        );
-        
+        UserResponse receiver = UserResponse.builder()
+                .id(message.getReceiver().getId())
+                .matricule(message.getReceiver().getMatricule())
+                .prenom(message.getReceiver().getPrenom())      
+                .nom(message.getReceiver().getNom())
+                .email(message.getReceiver().getEmail())
+                .telephone(message.getReceiver().getTelephone())
+                .role(message.getReceiver().getRole())
+                .isActive(message.getReceiver().getIsActive())
+                .build();
+
         return new MessageResponse(
                 message.getId(),
                 sender,

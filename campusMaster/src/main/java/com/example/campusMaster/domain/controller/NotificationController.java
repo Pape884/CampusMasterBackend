@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/notifications")
+@RequestMapping("/api/notifications")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Notifications", description = "Gestion des notifications")
@@ -33,7 +33,7 @@ public class NotificationController {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
         List<NotificationResponse> notifications = 
-            notificationService.getNotificationsByUser(currentUser.id());
+            notificationService.getNotificationsByUser(currentUser.getId());
         return ResponseEntity.ok(ApiSuccessResponse.<List<NotificationResponse>>builder()
                 .success(true)
                 .message("Liste des notifications")
@@ -48,7 +48,7 @@ public class NotificationController {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
         List<NotificationResponse> notifications = 
-            notificationService.getUnreadNotifications(currentUser.id());
+            notificationService.getUnreadNotifications(currentUser.getId());
 
         return ResponseEntity.ok(ApiSuccessResponse.<List<NotificationResponse>>builder()
                 .success(true)
@@ -63,7 +63,7 @@ public class NotificationController {
     public ResponseEntity<ApiSuccessResponse<Long>> countUnreadNotifications() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
-        Long count = notificationService.countUnreadNotifications(currentUser.id());
+        Long count = notificationService.countUnreadNotifications(currentUser.getId());
         return ResponseEntity.ok(ApiSuccessResponse.<Long>builder()
                 .success(true)
                 .message("Nombre de notifications non lues")
@@ -89,7 +89,7 @@ public class NotificationController {
     public ResponseEntity<ApiSuccessResponse<String>> markAllAsRead() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
-        notificationService.markAllAsRead(currentUser.id());
+        notificationService.markAllAsRead(currentUser.getId());
         return ResponseEntity.ok(ApiSuccessResponse.<String>builder()
                 .success(true)
                 .message("Toutes les notifications marquées comme lues")
@@ -116,7 +116,7 @@ public class NotificationController {
     public ResponseEntity<ApiSuccessResponse<String>> deleteReadNotifications() {
         String email = SecurityUtils.getCurrentUserEmail();
         UserResponse currentUser = userService.getUserByEmail(email);
-        notificationService.deleteReadNotifications(currentUser.id());
+        notificationService.deleteReadNotifications(currentUser.getId());
         return ResponseEntity.ok(ApiSuccessResponse.<String>builder()
                 .success(true)
                 .message("Notifications lues supprimées")

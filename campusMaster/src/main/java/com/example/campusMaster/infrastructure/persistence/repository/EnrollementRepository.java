@@ -32,4 +32,5 @@ public interface EnrollementRepository extends JpaRepository <Enrollment, Long>{
     
     boolean existsByUserAndModule(User user, CourseModule module);
 
+    void deleteByUser(User user);
 }

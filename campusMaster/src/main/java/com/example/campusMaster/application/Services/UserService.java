@@ -2,7 +2,6 @@ package com.example.campusMaster.application.Services;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -59,7 +58,7 @@ public class UserService {
         Specification<User> spec = (root, query, criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.conjunction();
 
-            // Recherche par nom, prénom ou email
+            // Recherche par matricule, nom, prénom ou email
             if (search != null && !search.isEmpty()) {
                 String searchPattern = "%" + search.toLowerCase() + "%";
                 Predicate searchPredicate = criteriaBuilder.or(
@@ -146,43 +145,52 @@ public class UserService {
                 .isActive(true)
                 .build();
 
-        // Sauvegarde du user d'abord
+        // 1️⃣ Sauvegarder le user
         User savedUser = userRepository.save(user);
 
-        // Création des enrollments
+        // 2️⃣ Créer les enrollments
         if (request.getModules() != null && !request.getModules().isEmpty()) {
 
-            Set<Enrollment> enrollments = request.getModules().stream()
+            List<Enrollment> enrollments = request.getModules().stream()
                     .map(moduleId -> {
                         CourseModule module = moduleRepository.findById(Long.valueOf(moduleId))
-                                .orElseThrow(() -> new ResourceNotFoundException("Module introuvable"));
+                                .orElseThrow(() -> new ResourceNotFoundException("Module introuvable : " + moduleId));
 
-                        return Enrollment.builder()
+                        Enrollment enrollment = Enrollment.builder()
                                 .user(savedUser)
                                 .module(module)
                                 .isActive(true)
                                 .enrolledAt(LocalDateTime.now())
                                 .build();
-                    })
-                    .collect(Collectors.toSet());
 
-            savedUser.setEnrollments(enrollments);
+                        return enrollment;
+                    })
+                    .toList();
+
+            // 3️⃣ Lier côté user
+            savedUser.getEnrollments().addAll(enrollments);
+
+            // 4️⃣ Sauvegarder les enrollments
+            enrollmentRepository.saveAll(enrollments);
         }
 
         return mapToResponse(savedUser);
     }
 
     // Mettre à jour un utilisateur
+    @Transactional
     public UserResponse updateUser(Long id, UpdateUserRequest request) {
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
 
-        // Vérifier si l'email est déjà utilisé par un autre utilisateur
-        if (!user.getEmail().equals(request.getEmail()) &&
-                userRepository.existsByEmail(request.getEmail())) {
+        // 🔐 Email unique
+        if (!user.getEmail().equals(request.getEmail())
+                && userRepository.existsByEmail(request.getEmail())) {
             throw new ResourceAlreadyExistsException("Cet email est déjà utilisé");
         }
 
+        // 🔄 Infos simples
         user.setPrenom(request.getPrenom());
         user.setNom(request.getNom());
         user.setEmail(request.getEmail());
@@ -192,16 +200,47 @@ public class UserService {
             user.setRole(request.getRole());
         }
 
+        /*
+         * =========================
+         * 🎓 GESTION DES ENROLLMENTS
+         * =========================
+         */
+        if (request.getModuleIds() != null) {
+
+            // 1️⃣ Supprimer les anciens enrollments
+            enrollmentRepository.deleteByUser(user);
+
+            // 2️⃣ Ajouter les nouveaux
+            List<Enrollment> newEnrollments = request.getModuleIds().stream()
+                    .map(moduleId -> {
+                        CourseModule module = moduleRepository.findById(moduleId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Module introuvable: " + moduleId));
+
+                        Enrollment enrollment = new Enrollment();
+                        enrollment.setUser(user);
+                        enrollment.setModule(module);
+                        enrollment.setIsActive(true);
+                        enrollment.setEnrolledAt(LocalDateTime.now());
+                        return enrollment;
+                    })
+                    .toList();
+
+            enrollmentRepository.saveAll(newEnrollments);
+
+            // 3️⃣ Mettre à jour la relation côté user
+            user.setEnrollments(newEnrollments);
+        }
+
         User updated = userRepository.save(user);
         return mapToResponse(updated);
     }
 
     // Mettre à jour le statut
-    public UserResponse updateStatus(Long id, Boolean isActive) {
+    public UserResponse updateStatus(Long id, boolean status) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
 
-        user.setIsActive(isActive);
+        user.setIsActive(status);
         User updated = userRepository.save(user);
         return mapToResponse(updated);
     }
@@ -277,8 +316,6 @@ public class UserService {
         return userRepository.countByRole(role);
     }
 
-
-
     // Mapper
 
     private ModuleResponse mapModule(CourseModule module) {
@@ -287,6 +324,8 @@ public class UserService {
                 .code(module.getCode())
                 .name(module.getName())
                 .semestre(module.getSemestre())
+                .departmentId(module.getDepartment().getId())
+                .coursesCount(module.getCourses().size())
                 .build();
     }
 
@@ -300,6 +339,7 @@ public class UserService {
                 .build();
 
     }
+
     private UserResponse mapToResponse(User user) {
 
         List<EnrollmentResponse> enrollments = user.getEnrollments()

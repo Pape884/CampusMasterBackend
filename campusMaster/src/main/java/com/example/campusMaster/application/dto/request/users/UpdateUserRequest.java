@@ -1,5 +1,7 @@
 package com.example.campusMaster.application.dto.request.users;
 
+import java.util.List;
+
 import com.example.campusMaster.domain.enums.Role;
 
 import jakarta.validation.constraints.Email;
@@ -23,4 +25,7 @@ public class UpdateUserRequest {
     
     private Role role;
 
+    private List<Long> moduleIds;
+
 }
+

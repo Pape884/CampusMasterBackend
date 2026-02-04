@@ -276,8 +276,7 @@ public class DepartmentService {
                 .id(c.getId())
                 .code(c.getCode())
                 .titre(c.getTitre())
-                .semestre(c.getSemestre())
-                .annee(c.getAnnee())
+                .status(c.getStatus())
                 .build();
     }
 
@@ -307,7 +306,7 @@ public class DepartmentService {
 
             course.setTitre(dto.getTitre());
             course.setDescription(dto.getDescription());
-            course.setAnnee(dto.getAnnee());
+            course.setStatus(dto.getStatus());
             course.setIsActive(dto.getIsActive());
 
             courses.add(course);

@@ -12,6 +12,7 @@ import com.example.campusMaster.application.dto.response.courses.CourseResponse;
 import com.example.campusMaster.application.dto.response.users.UserResponse;
 import com.example.campusMaster.domain.entity.Course;
 import com.example.campusMaster.domain.entity.User;
+import com.example.campusMaster.domain.enums.Role;
 import com.example.campusMaster.domain.entity.CourseModule;
 import com.example.campusMaster.infrastructure.exception.ResourceAlreadyExistsException;
 import com.example.campusMaster.infrastructure.exception.ResourceNotFoundException;
@@ -28,34 +29,44 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
     private final ModuleRepository moduleRepository;
+    private final FileStorageService fileStorageService;
 
+    @Transactional
     public CourseResponse createCourse(CreateCourseRequest request, Long teacherId) {
-        // Vérifier si le code existe déjà
+
+        // Vérifier unicité du code
         if (courseRepository.existsByCode(request.code())) {
             throw new ResourceAlreadyExistsException("Code cours déjà utilisé");
         }
 
+        // Vérifier enseignant
         User teacher = userRepository.findById(teacherId)
                 .orElseThrow(() -> new ResourceNotFoundException("Enseignant introuvable"));
 
-        CourseModule module = null;
-        if (request.moduleId() != null) {
-            module = moduleRepository.findById(request.moduleId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Module introuvable"));
+        if (!teacher.getRole().equals(Role.TEACHER)) {
+            throw new IllegalArgumentException("L'utilisateur n'est pas un enseignant");
         }
+
+        // Vérifier module
+        CourseModule module = moduleRepository.findById(request.moduleId())
+                .orElseThrow(() -> new ResourceNotFoundException("Module introuvable"));
+
+        // Déterminer le statut
+        boolean isActive = "published".equalsIgnoreCase(request.status());
 
         Course course = Course.builder()
                 .code(request.code())
                 .titre(request.titre())
                 .description(request.description())
-                .semestre(request.semestre())
-                .annee(request.annee())
+                .credits(request.credits())
+                .status(request.status())
                 .teacher(teacher)
                 .module(module)
-                .isActive(true)
+                .isActive(isActive)
                 .build();
 
         Course saved = courseRepository.save(course);
+
         return mapToResponse(saved);
     }
 
@@ -66,12 +77,6 @@ public class CourseService {
         course.setTitre(request.titre());
         course.setDescription(request.description());
 
-        if (request.semestre() != null) {
-            course.setSemestre(request.semestre());
-        }
-        if (request.annee() != null) {
-            course.setAnnee(request.annee());
-        }
         if (request.isActive() != null) {
             course.setIsActive(request.isActive());
         }
@@ -92,22 +97,20 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
-    public List<CourseResponse> getCoursesByTeacher(Long teacherId) {
-        return courseRepository.findActiveCoursesbyTeacher(teacherId).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    public List<CourseResponse> getCoursesBySemestre(String semestre) {
-        return courseRepository.findBySemestre(semestre).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
     public void deleteCourse(Long courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cours introuvable"));
+
+        // Selectionner les chapitres du courset les supprimer
+
+
         courseRepository.delete(course);
+    }
+
+    public List<CourseResponse> getCoursesByModule(Long moduleId) {
+        return courseRepository.findByModuleId(moduleId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
     // Mapper
@@ -129,11 +132,9 @@ public class CourseService {
                 .code(course.getCode())
                 .titre(course.getTitre())
                 .description(course.getDescription())
-                .semestre(course.getSemestre())
-                .annee(course.getAnnee())
+                .moduleId(course.getModule().getId())
                 .isActive(course.getIsActive())
-                .teacher(teacher)
-                .studentsCount(course.getEnrolledStudentsCount())
+                .teacherId(course.getTeacher().getId())
                 .createdAt(course.getCreatedAt())
                 .build();
     }

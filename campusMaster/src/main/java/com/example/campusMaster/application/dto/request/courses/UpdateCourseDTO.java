@@ -5,10 +5,10 @@ import lombok.Data;
 @Data
 public class UpdateCourseDTO {
     private Long id; // null = nouveau cours
-    private String code;
     private String titre;
     private String description;
-    private Integer annee;
+    private Integer credits;
+    private String status;
     private Boolean isActive;
 }
 

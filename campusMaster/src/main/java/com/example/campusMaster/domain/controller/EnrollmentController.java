@@ -14,6 +14,7 @@ import com.example.campusMaster.application.Services.EnrollmentService;
 import com.example.campusMaster.application.Services.UserService;
 import com.example.campusMaster.application.dto.request.enrollement.EnrollmentRequest;
 import com.example.campusMaster.application.dto.response.enrollement.EnrollmentResponse;
+import com.example.campusMaster.application.dto.response.modules.ModuleResponse;
 import com.example.campusMaster.application.dto.response.users.UserResponse;
 import com.example.campusMaster.infrastructure.exception.ApiSuccessResponse;
 import com.example.campusMaster.infrastructure.security.SecurityUtils;
@@ -27,93 +28,94 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Enrollments", description = "Gestion des inscriptions aux cours")
 public class EnrollmentController {
-    
-    private final EnrollmentService enrollmentService;
-    private final UserService userService;
-    
-    @Operation(summary = "S'inscrire à un cours (STUDENT)")
-    @PostMapping
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
-    public ResponseEntity<ApiSuccessResponse<EnrollmentResponse>> enrollToCourse(
-            @Valid @RequestBody EnrollmentRequest request
-    ) {
-        String email = SecurityUtils.getCurrentUserEmail();
-        UserResponse currentUser = userService.getUserByEmail(email);
-        
-        EnrollmentResponse enrollment = enrollmentService.enrollUser(
-            currentUser.getId(), 
-            request.moduleId()
-        );
-        
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiSuccessResponse.<EnrollmentResponse>builder()
-                        .success(true)
-                        .message("Inscription réussie")
-                        .data(enrollment)
-                        .timestamp(LocalDateTime.now())
-                        .build());
-    }
-    
-    @Operation(summary = "Se désinscrire d'un cours (STUDENT)")
-    @DeleteMapping("/{enrollmentId}")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
-    public ResponseEntity<ApiSuccessResponse<String>> unenrollFromCourse(
-            @PathVariable Long enrollmentId
-    ) {
-        enrollmentService.unenrollStudent(enrollmentId);
-        return ResponseEntity.ok(ApiSuccessResponse.<String>builder()
-                .success(true)
-                .message("Désinscription réussie")
-                .data(null)
-                .timestamp(LocalDateTime.now())
-                .build());
-    }
-    
-    @Operation(summary = "Lister mes inscriptions (STUDENT)")
-    @GetMapping("/my-enrollments")
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<ApiSuccessResponse<List<EnrollmentResponse>>> getMyEnrollments() {
-        String email = SecurityUtils.getCurrentUserEmail();
-        UserResponse currentUser = userService.getUserByEmail(email);
-        List<EnrollmentResponse> enrollments = 
-            enrollmentService.getEnrollmentsByUser(currentUser.getId());
-        return ResponseEntity.ok(ApiSuccessResponse.<List<EnrollmentResponse>>builder()
-                .success(true)
-                .message("Inscriptions récupérées")
-                .data(enrollments)
-                .timestamp(LocalDateTime.now())
-                .build());
-    }
 
-    @Operation(summary = "Lister les inscriptions d'un module (TEACHER/ADMIN)")
-    @GetMapping("/module/{moduleId}")
-    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
-    public ResponseEntity<ApiSuccessResponse<List<EnrollmentResponse>>> getEnrollmentsByModule(
-            @PathVariable Long moduleId
-    ) {
-        List<EnrollmentResponse> enrollments = 
-            enrollmentService.getEnrollmentsByModule(moduleId);
-        return ResponseEntity.ok(ApiSuccessResponse.<List<EnrollmentResponse>>builder()
-                .success(true)
-                .message("Inscriptions récupérées")
-                .data(enrollments)
-                .timestamp(LocalDateTime.now())
-                .build());
-    }
-    
-    @Operation(summary = "Nombre d'inscrits à un module")
-    @GetMapping("/module/{moduleId}/count")
-    public ResponseEntity<ApiSuccessResponse<Long>> countEnrollmentsByModule(
-            @PathVariable Long moduleId
-    ) {
-        Long count = enrollmentService.countEnrollmentsByModule(moduleId);
-        return ResponseEntity.ok(ApiSuccessResponse.<Long>builder()
-                .success(true)
-                .message("Nombre d'inscrits récupéré")
-                .data(count)
-                .timestamp(LocalDateTime.now())
-                .build());
-    }
+        private final EnrollmentService enrollmentService;
+        private final UserService userService;
+
+        @Operation(summary = "S'inscrire à un cours (STUDENT)")
+        @PostMapping
+        @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+        public ResponseEntity<ApiSuccessResponse<EnrollmentResponse>> enrollToCourse(
+                        @Valid @RequestBody EnrollmentRequest request) {
+                String email = SecurityUtils.getCurrentUserEmail();
+                UserResponse currentUser = userService.getUserByEmail(email);
+
+                EnrollmentResponse enrollment = enrollmentService.enrollUser(
+                                currentUser.getId(),
+                                request.moduleId());
+
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(ApiSuccessResponse.<EnrollmentResponse>builder()
+                                                .success(true)
+                                                .message("Inscription réussie")
+                                                .data(enrollment)
+                                                .timestamp(LocalDateTime.now())
+                                                .build());
+        }
+
+        @Operation(summary = "Se désinscrire d'un cours (STUDENT)")
+        @DeleteMapping("/{enrollmentId}")
+        @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+        public ResponseEntity<ApiSuccessResponse<String>> unenrollFromCourse(
+                        @PathVariable Long enrollmentId) {
+                enrollmentService.unenrollStudent(enrollmentId);
+                return ResponseEntity.ok(ApiSuccessResponse.<String>builder()
+                                .success(true)
+                                .message("Désinscription réussie")
+                                .data(null)
+                                .timestamp(LocalDateTime.now())
+                                .build());
+        }
+
+        @Operation(summary = "Lister mes inscriptions (STUDENT)")
+        @GetMapping("/my-enrollments")
+        @PreAuthorize("hasRole('STUDENT')")
+        public ResponseEntity<ApiSuccessResponse<List<EnrollmentResponse>>> getMyEnrollments() {
+                String email = SecurityUtils.getCurrentUserEmail();
+                UserResponse currentUser = userService.getUserByEmail(email);
+                List<EnrollmentResponse> enrollments = enrollmentService.getEnrollmentsByUser(currentUser.getId());
+                return ResponseEntity.ok(ApiSuccessResponse.<List<EnrollmentResponse>>builder()
+                                .success(true)
+                                .message("Inscriptions récupérées")
+                                .data(enrollments)
+                                .timestamp(LocalDateTime.now())
+                                .build());
+        }
+
+        @Operation(summary = "Lister les inscriptions d'un module (TEACHER/ADMIN)")
+        @GetMapping("/module/{moduleId}")
+        @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+        public ResponseEntity<ApiSuccessResponse<List<EnrollmentResponse>>> getEnrollmentsByModule(
+                        @PathVariable Long moduleId) {
+                List<EnrollmentResponse> enrollments = enrollmentService.getEnrollmentsByModule(moduleId);
+                return ResponseEntity.ok(ApiSuccessResponse.<List<EnrollmentResponse>>builder()
+                                .success(true)
+                                .message("Inscriptions récupérées")
+                                .data(enrollments)
+                                .timestamp(LocalDateTime.now())
+                                .build());
+        }
+
+        @Operation(summary = "Nombre d'inscrits à un module")
+        @GetMapping("/module/{moduleId}/count")
+        public ResponseEntity<ApiSuccessResponse<Long>> countEnrollmentsByModule(
+                        @PathVariable Long moduleId) {
+                Long count = enrollmentService.countEnrollmentsByModule(moduleId);
+                return ResponseEntity.ok(ApiSuccessResponse.<Long>builder()
+                                .success(true)
+                                .message("Nombre d'inscrits récupéré")
+                                .data(count)
+                                .timestamp(LocalDateTime.now())
+                                .build());
+        }
+
+        /*
+         * RECUPERER LES MODULES POUR UN USER
+         */
+        @GetMapping("/teachers/{id}/modules")
+        public ResponseEntity<List<ModuleResponse>> getModulesByTeacher(@PathVariable Long id) {
+                return ResponseEntity.ok(enrollmentService.getModuleByTeacher(id));
+        }
+
 }
-

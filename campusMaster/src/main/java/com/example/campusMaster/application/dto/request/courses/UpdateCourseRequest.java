@@ -6,10 +6,10 @@ public record UpdateCourseRequest(
     String titre,
     
     String description,
+
+    Integer credits,
     
-    String semestre,
-    
-    Integer annee,
+    String status,
     
     Boolean isActive
 ) {}

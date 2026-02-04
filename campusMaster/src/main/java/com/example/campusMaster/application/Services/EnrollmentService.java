@@ -5,6 +5,8 @@ import com.example.campusMaster.application.dto.response.modules.ModuleResponse;
 import com.example.campusMaster.domain.entity.CourseModule;
 import com.example.campusMaster.domain.entity.Enrollment;
 import com.example.campusMaster.domain.entity.User;
+import com.example.campusMaster.domain.enums.Role;
+import com.example.campusMaster.infrastructure.exception.ResourceNotFoundException;
 import com.example.campusMaster.infrastructure.persistence.repository.EnrollementRepository;
 import com.example.campusMaster.infrastructure.persistence.repository.ModuleRepository;
 import com.example.campusMaster.infrastructure.persistence.repository.UserRepository;
@@ -142,6 +144,28 @@ public class EnrollmentService {
         return mapToResponse(updated);
     }
 
+    public List<ModuleResponse> getModuleByTeacher(Long teacherId) {
+
+        // Vérifier que l'enseignant existe
+        User teacher = userRepository.findById(teacherId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enseignant introuvable"));
+
+        // (Optionnel mais recommandé) Vérifier le rôle
+        if (!teacher.getRole().equals(Role.TEACHER)) {
+            throw new IllegalArgumentException("L'utilisateur n'est pas un enseignant");
+        }
+
+        // Récupérer les enrollments
+        List<Enrollment> enrollments = enrollmentRepository.findByUserId(teacherId);
+
+        // Mapper vers ModuleResponse (sans doublons)
+        return enrollments.stream()
+                .map(Enrollment::getModule)
+                .distinct()
+                .map(this::mapToModule)
+                .toList();
+    }
+
     /**
      * Supprimer une inscription
      */
@@ -154,7 +178,7 @@ public class EnrollmentService {
 
     // ==================== MAPPER ====================
 
-    private ModuleResponse mapModule(CourseModule module) {
+    private ModuleResponse mapToModule(CourseModule module) {
         return ModuleResponse.builder()
                 .id(module.getId())
                 .code(module.getCode())
@@ -166,7 +190,7 @@ public class EnrollmentService {
     private EnrollmentResponse mapToResponse(Enrollment enrollment) {
         return EnrollmentResponse.builder()
                 .id(enrollment.getId())
-                .module(mapModule(enrollment.getModule()))
+                .module(mapToModule(enrollment.getModule()))
                 .enrolledAt(enrollment.getEnrolledAt())
                 .isActive(enrollment.getIsActive())
                 .finalGrade(enrollment.getFinalGrade())

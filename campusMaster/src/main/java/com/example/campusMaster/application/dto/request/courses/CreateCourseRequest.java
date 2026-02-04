@@ -1,6 +1,5 @@
 package com.example.campusMaster.application.dto.request.courses;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 public record CreateCourseRequest(
     @NotBlank(message = "Code obligatoire")
@@ -11,11 +10,11 @@ public record CreateCourseRequest(
     
     String description,
     
-    @NotBlank(message = "Semestre obligatoire")
-    String semestre,
+    Integer credits,
     
-    @NotNull(message = "Année obligatoire")
-    Integer annee,
-    
+    String status,
+
     Long moduleId
+
 ) {}
+

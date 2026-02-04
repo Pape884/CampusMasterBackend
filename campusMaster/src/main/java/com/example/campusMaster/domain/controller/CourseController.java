@@ -97,52 +97,6 @@ public class CourseController {
         return ResponseEntity.ok(response);
     }
     
-    @Operation(summary = "Lister les cours d'un enseignant")
-    @GetMapping("/teacher/{teacherId}")
-    public ResponseEntity<ApiSuccessResponse<List<CourseResponse>>> getCoursesByTeacher(
-            @PathVariable Long teacherId
-    ) {
-        List<CourseResponse> courses = courseService.getCoursesByTeacher(teacherId);
-        ApiSuccessResponse<List<CourseResponse>> response = ApiSuccessResponse.<List<CourseResponse>>builder()
-                .success(true)
-                .message("Cours récupérés avec succès")
-                .data(courses)
-                .timestamp(java.time.LocalDateTime.now())
-                .build();
-        return ResponseEntity.ok(response);
-    }
-    
-    @Operation(summary = "Lister mes cours (enseignant connecté)")
-    @GetMapping("/my-courses")
-    @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<ApiSuccessResponse<List<CourseResponse>>> getMyCourses() {
-        String email = SecurityUtils.getCurrentUserEmail();
-        UserResponse currentUser = userService.getUserByEmail(email);
-        List<CourseResponse> courses = courseService.getCoursesByTeacher(currentUser.getId());
-        ApiSuccessResponse<List<CourseResponse>> response = ApiSuccessResponse.<List<CourseResponse>>builder()
-                .success(true)
-                .message("Cours récupérés avec succès")
-                .data(courses)
-                .timestamp(java.time.LocalDateTime.now())
-                .build();
-        return ResponseEntity.ok(response);
-    }
-    
-    @Operation(summary = "Lister les cours par semestre")
-    @GetMapping("/semestre/{semestre}")
-    public ResponseEntity<ApiSuccessResponse<List<CourseResponse>>> getCoursesBySemestre(
-            @PathVariable String semestre
-    ) {
-        List<CourseResponse> courses = courseService.getCoursesBySemestre(semestre);
-        ApiSuccessResponse<List<CourseResponse>> response = ApiSuccessResponse.<List<CourseResponse>>builder()
-                .success(true)
-                .message("Cours récupérés avec succès")
-                .data(courses)
-                .timestamp(java.time.LocalDateTime.now())
-                .build();
-        return ResponseEntity.ok(response);
-    }
-    
     @Operation(summary = "Supprimer un cours (ADMIN)")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -156,5 +110,20 @@ public class CourseController {
                 .build();
         return ResponseEntity.ok(response);
     }
-}
 
+    @Operation(summary = "Lister les cours par module")
+    @GetMapping("/module/{moduleId}")
+    public ResponseEntity<ApiSuccessResponse<List<CourseResponse>>> getCoursesByModule(
+            @PathVariable Long moduleId
+    ) {
+        List<CourseResponse> courses = courseService.getCoursesByModule(moduleId);
+        ApiSuccessResponse<List<CourseResponse>> response = ApiSuccessResponse.<List<CourseResponse>>builder()
+                .success(true)
+                .message("Cours récupérés avec succès")
+                .data(courses)
+                .timestamp(java.time.LocalDateTime.now())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+}

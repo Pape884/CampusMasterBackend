@@ -1,8 +1,6 @@
 package com.example.campusMaster.application.dto.response.courses;
 import java.time.LocalDateTime;
 
-import com.example.campusMaster.application.dto.response.users.UserResponse;
-import com.example.campusMaster.domain.entity.CourseModule;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Builder;
@@ -19,13 +17,11 @@ public class CourseResponse {
     String code;
     String titre;
     String description;
-    String semestre;
-    Integer annee;
-    Boolean isActive;
-    CourseModule module;
-    UserResponse teacher;
     Integer credits;
-    Integer studentsCount;
+    String status;
+    Boolean isActive;
+    Long moduleId;
+    Long teacherId;
     LocalDateTime createdAt;
 }
     

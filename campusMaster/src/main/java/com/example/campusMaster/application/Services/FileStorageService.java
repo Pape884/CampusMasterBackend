@@ -50,7 +50,7 @@ public class FileStorageService {
             log.info("Fichier uploadé avec succès: {}", fileName);
 
             // Retourner le chemin relatif
-            return String.format("/%s/%s", subDirectory, fileName);
+            return String.format("/uploads/%s/%s", subDirectory, fileName);
 
         } catch (IOException e) {
             log.error("Erreur lors de l'upload du fichier: {}", e.getMessage(), e);

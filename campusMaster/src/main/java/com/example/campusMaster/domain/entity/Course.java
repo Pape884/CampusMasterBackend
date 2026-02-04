@@ -45,18 +45,14 @@ public class Course {
     
     @Column(columnDefinition = "TEXT")
     private String description;
-    
-    @NotBlank(message = "Semestre obligatoire")
-    @Column(nullable = false, length = 20)
-    private String semestre;
-    
-    @NotNull(message = "Année obligatoire")
-    @Column(nullable = false)
-    private Integer annee;
 
     @NotNull(message = "Crédits obligatoire")
     @Column(nullable = false)
     private Integer credits;
+
+    @NotNull(message = "Status obligatoire")
+    @Column(nullable = false)
+    private String status;
 
     @Builder.Default
     @Column(nullable = false)
@@ -93,9 +89,5 @@ public class Course {
         this.description = description;
     }
 
-
-    public Integer getEnrolledStudentsCount() {
-        throw new UnsupportedOperationException("Unimplemented method 'getEnrolledStudentsCount'");
-    }
 
 }
